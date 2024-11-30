@@ -1,0 +1,20 @@
+micronaut:
+  application:
+    name: oda-media-service
+  security:
+    authentication: cookie
+    token:
+      jwt:
+        signatures:
+          jwks:
+            keycloak:
+              url: https://auth.oda.digital/realms/ODA/protocol/openid-connect/certs
+  http.services.youtube.url: https://youtube.googleapis.com
+flyway:
+  datasources:
+    default:
+      enabled: true
+jpa:
+  default:
+    entity-scan:
+        packages: 'io.github.opendonationassistant'

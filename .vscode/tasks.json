@@ -1,0 +1,15 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Run service",
+      "type": "shell",
+      "command": "(podman stop media-service || true) && export MICRONAUT_SERVER_PORT=8085 && mvn clean package -DskipTests && java -jar target/oda-media-service-0.1.jar",
+      "group": "run",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    }
+  ]
+}

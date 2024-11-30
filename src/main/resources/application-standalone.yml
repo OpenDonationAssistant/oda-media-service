@@ -1,0 +1,11 @@
+datasources:
+  default:
+    url: ${JDBC_URL}
+    username: ${JDBC_USER}
+    password: ${JDBC_PASSWORD}
+    driverClassName: 'org.postgresql.Driver'
+    db-type: "postgresql"
+rabbitmq.host: ${RABBITMQ_HOST}
+logger:
+  levels:
+    io.github.stcarolas: INFO

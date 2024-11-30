@@ -56,6 +56,7 @@ jobs:
       name: Build and push
       uses: docker/build-push-action@v5
       with:
+        github-token: ${{ secrets.NPM_TOKEN }}
         context: .
         push: true
         tags: ghcr.io/opendonationassistant/oda-media-service:${{ github.RUN_NUMBER }}

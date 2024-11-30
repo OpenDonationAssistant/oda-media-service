@@ -15,7 +15,7 @@ import jakarta.inject.Singleton;
 @OpenAPIDefinition(
   info = @Info(
     title = "ODA Media Service",
-    version = "0.3",
+    version = "0.4",
     description = "Media Service API",
     license = @License(
       name = "GPL-3.0",

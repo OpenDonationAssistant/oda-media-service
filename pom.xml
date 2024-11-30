@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.github.stcarolas.oda</groupId>
   <artifactId>oda-media-service</artifactId>
-  <version>0.3</version>
+  <version>0.4</version>
   <packaging>${packaging}</packaging>
   <!--#region parent-->
   <parent>
@@ -256,7 +256,7 @@
               <goal>generate</goal>
             </goals>
             <configuration>
-              <inputSpec>${project.basedir}/target/classes/META-INF/swagger/oda-media-service-0.3.yml</inputSpec>
+              <inputSpec>${project.basedir}/target/classes/META-INF/swagger/oda-media-service-0.4.yml</inputSpec>
               <generatorName>typescript-axios</generatorName>
               <configurationFile>openapi-config.json</configurationFile>
               <configOptions>

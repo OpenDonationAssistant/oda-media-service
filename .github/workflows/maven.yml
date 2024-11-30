@@ -38,7 +38,7 @@ jobs:
 
     - uses: JS-DevTools/npm-publish@v3
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.NPM_TOKEN }}
         registry: "https://npm.pkg.github.com"
         package: "target/generated-sources/openapi/"
 

@@ -38,12 +38,12 @@ public class NewVideoRequest {
 
   public PreparedVideo prepare() {
     log.debug("preparing media by url: {}", url);
-    return url.contains("vk.com") ? preparedVk() : prepareYoutube();
+    return url.contains("vkvideo.ru") ? preparedVk() : prepareYoutube();
   }
 
   private PreparedVideo preparedVk() {
     var id = Generators.timeBasedEpochGenerator().generate().toString();
-    var originId = url.replaceAll("https://vk.com/video", "");
+    var originId = url.replaceAll("https://vkvideo.ru/video", "");
     var preparedVideo = new PreparedVideo();
     preparedVideo.setId(id);
     preparedVideo.setUrl(url + "&js_api=1");

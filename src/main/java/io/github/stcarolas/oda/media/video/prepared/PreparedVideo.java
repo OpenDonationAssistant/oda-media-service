@@ -37,7 +37,7 @@ public class PreparedVideo extends Video {
     var video = ReadyVideo.from(this, Instant.now());
     video.setOwner(owner);
     video.setRecipientId(recipient);
-    Beans.get(VideoRepository.class).save(video);
+    Beans.get(VideoRepository.class).update(video);
     ReadyVideoNotificationSender sender = Beans.get(
       ReadyVideoNotificationSender.class
     );

@@ -3,16 +3,13 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.github.stcarolas.oda</groupId>
   <artifactId>oda-media-service</artifactId>
-  <version>0.4</version>
+  <version>0.5</version>
   <packaging>${packaging}</packaging>
-  <!--#region parent-->
   <parent>
     <groupId>io.micronaut.platform</groupId>
     <artifactId>micronaut-parent</artifactId>
     <version>4.2.3</version>
   </parent>
-  <!--#endregion-->
-  <!--#region properties-->
   <properties>
     <packaging>jar</packaging>
     <jdk.version>17</jdk.version>
@@ -24,16 +21,12 @@
     <micronaut.aot.packageName>io.github.stcarolas.oda.aot.generated</micronaut.aot.packageName>
     <exec.mainClass>io.github.stcarolas.oda.Application</exec.mainClass>
   </properties>
-  <!--#endregion-->
-  <!--#region repositories-->
   <repositories>
     <repository>
       <id>central</id>
       <url>https://repo.maven.apache.org/maven2</url>
     </repository>
   </repositories>
-  <!--#endregion-->
-  <!--#region dependencies-->
   <dependencies>
     <dependency>
       <groupId>io.github.opendonationassistant</groupId>
@@ -256,7 +249,7 @@
               <goal>generate</goal>
             </goals>
             <configuration>
-              <inputSpec>${project.basedir}/target/classes/META-INF/swagger/oda-media-service-0.4.yml</inputSpec>
+            <inputSpec>${project.basedir}/target/classes/META-INF/swagger/oda-media-service-${version}.yml</inputSpec>
               <generatorName>typescript-axios</generatorName>
               <configurationFile>openapi-config.json</configurationFile>
               <configOptions>

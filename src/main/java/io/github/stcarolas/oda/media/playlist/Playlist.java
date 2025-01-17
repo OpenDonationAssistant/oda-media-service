@@ -44,6 +44,10 @@ public class Playlist {
     return this;
   }
 
+  public void delete(){
+    repository.deleteById(id);
+  }
+
   public PlaylistDto asPlaylistDto(){
     return new PlaylistDto(id, title, ownerId, items);
   }

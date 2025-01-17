@@ -40,6 +40,20 @@ public class PlaylistCommandController {
       .orElse(HttpResponse.notFound());
   }
 
+  @Post("/playlists/commands/delete")
+  @Secured(SecurityRule.IS_AUTHENTICATED)
+  public HttpResponse<PlaylistDto> deletePlaylist(
+    @Nonnull Authentication auth,
+    @Nonnull @Body DeletePlaylistCommand command
+  ) {
+    try {
+      command.execute(playlistRepository);
+      return HttpResponse.ok();
+    } catch (Exception e){
+      return HttpResponse.serverError();
+    }
+  }
+
   protected String getOwnerId(Authentication auth) {
     return String.valueOf(
       auth.getAttributes().getOrDefault("preferred_username", "")

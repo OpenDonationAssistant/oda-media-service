@@ -249,11 +249,12 @@
               <goal>generate</goal>
             </goals>
             <configuration>
-            <inputSpec>${project.basedir}/target/classes/META-INF/swagger/oda-media-service-${version}.yml</inputSpec>
+              <inputSpec>${project.basedir}/target/classes/META-INF/swagger/oda-media-service-1.0.0.yml</inputSpec>
               <generatorName>typescript-axios</generatorName>
               <configurationFile>openapi-config.json</configurationFile>
               <configOptions>
                 <output>${project.build.directory}/</output>
+                <npmVersion>${project.version}</npmVersion>
               </configOptions>
             </configuration>
           </execution>

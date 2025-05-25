@@ -12,17 +12,7 @@ import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.info.License;
 import jakarta.inject.Singleton;
 
-@OpenAPIDefinition(
-  info = @Info(
-    title = "ODA Media Service",
-    description = "Media Service API",
-    license = @License(
-      name = "GPL-3.0",
-      url = "https://www.gnu.org/licenses/gpl-3.0.en.html"
-    ),
-    contact = @Contact(name = "stCarolas", email = "stcarolas@gmail.com")
-  )
-)
+@OpenAPIDefinition(info = @Info(title = "oda-media-service", version = "1.0.0"))
 public class Application {
 
   public static void main(String[] args) {

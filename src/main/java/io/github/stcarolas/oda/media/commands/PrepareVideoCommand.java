@@ -1,15 +1,6 @@
 package io.github.stcarolas.oda.media.commands;
 
-import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.zalando.problem.Problem;
-
 import com.fasterxml.uuid.Generators;
-
 import io.github.stcarolas.oda.media.video.prepared.PreparedVideo;
 import io.github.stcarolas.oda.media.youtube.ContentDetails;
 import io.github.stcarolas.oda.media.youtube.RegionRestriction;
@@ -20,6 +11,12 @@ import io.micronaut.core.util.StringUtils;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.problem.HttpStatusType;
 import io.micronaut.serde.annotation.Serdeable;
+import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.zalando.problem.Problem;
 
 @Serdeable
 public class PrepareVideoCommand {
@@ -34,9 +31,9 @@ public class PrepareVideoCommand {
     Pattern.MULTILINE
   );
 
-  private  String url;
+  private String url;
 
-  public PrepareVideoCommand(String  url){
+  public PrepareVideoCommand(String url) {
     this.url = url;
   }
 
@@ -44,8 +41,7 @@ public class PrepareVideoCommand {
     log.debug("preparing media by url: {}", url);
     var id = Generators.timeBasedEpochGenerator().generate().toString();
     if (!StringUtils.hasText(url)) {
-      throw Problem
-        .builder()
+      throw Problem.builder()
         .withTitle("Incorrect media")
         .withStatus(new HttpStatusType(HttpStatus.BAD_REQUEST))
         .withDetail("Отсутствует ссылка")
@@ -53,8 +49,7 @@ public class PrepareVideoCommand {
     }
     Matcher matcher = pattern.matcher(url);
     if (!matcher.matches()) {
-      throw Problem
-        .builder()
+      throw Problem.builder()
         .withTitle("Incorrect media")
         .withStatus(new HttpStatusType(HttpStatus.BAD_REQUEST))
         .withDetail("Некорректная ссылка")
@@ -66,8 +61,7 @@ public class PrepareVideoCommand {
     Videos found = youTube.list(videoId);
     log.debug("Found: {}", found);
     if (found.getItems() == null || found.getItems().isEmpty()) {
-      throw Problem
-        .builder()
+      throw Problem.builder()
         .withTitle("Incorrect media")
         .withStatus(new HttpStatusType(HttpStatus.BAD_REQUEST))
         .withDetail("Видео не найдено")
@@ -80,8 +74,7 @@ public class PrepareVideoCommand {
     if (viewStats.length() <= 3) {
       var viewCount = Integer.parseInt(viewStats);
       if (viewCount < 100) {
-        throw Problem
-          .builder()
+        throw Problem.builder()
           .withTitle("Incorrect media")
           .withStatus(new HttpStatusType(HttpStatus.BAD_REQUEST))
           .withDetail("Слишком мало просмотров у видео")
@@ -89,30 +82,26 @@ public class PrepareVideoCommand {
       }
     }
     if (
-      Optional
-        .ofNullable(video.getContentDetails())
+      Optional.ofNullable(video.getContentDetails())
         .map(ContentDetails::getContentRating)
         .map(it -> it.get("ytRating"))
         .map(it -> "ytAgeRestricted".equals(it))
         .orElse(false)
     ) {
-      throw Problem
-        .builder()
+      throw Problem.builder()
         .withTitle("Incorrect media")
         .withStatus(new HttpStatusType(HttpStatus.BAD_REQUEST))
         .withDetail("Видео не должно быть 18+")
         .build();
     }
     if (
-      Optional
-        .ofNullable(video.getContentDetails())
+      Optional.ofNullable(video.getContentDetails())
         .map(ContentDetails::getRegionRestriction)
         .map(RegionRestriction::getBlocked)
         .map(it -> it.contains("RU"))
         .orElse(false)
     ) {
-      throw Problem
-        .builder()
+      throw Problem.builder()
         .withTitle("Incorrect media")
         .withStatus(new HttpStatusType(HttpStatus.BAD_REQUEST))
         .withDetail("Видео заблокировано в РФ")
@@ -120,7 +109,9 @@ public class PrepareVideoCommand {
     }
     var preparedVideo = new PreparedVideo();
     preparedVideo.setId(id);
-    preparedVideo.setUrl("https://www.youtube.com/watch?v=%s".formatted(videoId));
+    preparedVideo.setUrl(
+      "https://www.youtube.com/watch?v=%s".formatted(videoId)
+    );
     preparedVideo.setOriginId(videoId);
     preparedVideo.setTitle(video.getSnippet().getTitle());
     preparedVideo.setThumbnail(
@@ -128,5 +119,4 @@ public class PrepareVideoCommand {
     );
     return preparedVideo;
   }
-  
 }

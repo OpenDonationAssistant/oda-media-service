@@ -2,6 +2,8 @@ package io.github.stcarolas.oda.media.video;
 
 import com.fasterxml.uuid.Generators;
 import io.github.stcarolas.oda.Beans;
+import io.github.stcarolas.oda.media.repository.settings.MediaSettings;
+import io.github.stcarolas.oda.media.repository.settings.MediaSettingsRepository;
 import io.github.stcarolas.oda.media.video.prepared.PreparedVideo;
 import io.github.stcarolas.oda.media.youtube.ContentDetails;
 import io.github.stcarolas.oda.media.youtube.RegionRestriction;
@@ -31,9 +33,11 @@ public class NewVideoRequest {
   );
 
   private String url;
+  private MediaSettings settings;
 
-  public NewVideoRequest(String url) {
+  public NewVideoRequest(String url, MediaSettings settings) {
     this.url = url;
+    this.settings = settings;
   }
 
   public PreparedVideo prepare() {
@@ -42,6 +46,14 @@ public class NewVideoRequest {
   }
 
   private PreparedVideo preparedVk() {
+    if (!settings.getData().vkvideoEnabled()){
+      throw Problem
+        .builder()
+        .withTitle("Incorrect media")
+        .withStatus(new HttpStatusType(HttpStatus.BAD_REQUEST))
+        .withDetail("Реквесты с VK Video выключены")
+        .build();
+    }
     var id = Generators.timeBasedEpochGenerator().generate().toString();
     var originId = url.replaceAll("https://vkvideo.ru/video", "");
     var preparedVideo = new PreparedVideo();
@@ -53,6 +65,14 @@ public class NewVideoRequest {
   }
 
   private PreparedVideo prepareYoutube() {
+    if (!settings.getData().youtubeEnabled()){
+      throw Problem
+        .builder()
+        .withTitle("Incorrect media")
+        .withStatus(new HttpStatusType(HttpStatus.BAD_REQUEST))
+        .withDetail("Реквесты с YouTube выключены")
+        .build();
+    }
     var id = Generators.timeBasedEpochGenerator().generate().toString();
 
     var youTube = Beans.get(YouTube.class);
@@ -90,33 +110,27 @@ public class NewVideoRequest {
     log.info("{}", video);
 
     String viewStats = video.getStatistics().getViewCount();
-    if (viewStats.length() <= 3) {
-      var viewCount = Integer.parseInt(viewStats);
-      if (viewCount < 100) {
-        throw Problem
-          .builder()
-          .withTitle("Incorrect media")
-          .withStatus(new HttpStatusType(HttpStatus.BAD_REQUEST))
-          .withDetail("Слишком мало просмотров у видео")
-          .build();
-      }
+    var viewCount = Integer.parseInt(viewStats);
+    if (viewCount < settings.minViewAmount()) {
+      throw Problem
+        .builder()
+        .withTitle("Incorrect media")
+        .withStatus(new HttpStatusType(HttpStatus.BAD_REQUEST))
+        .withDetail("Слишком мало просмотров у видео")
+        .build();
     }
     if (
       Optional
         .ofNullable(video.getSnippet())
         .map(it -> it.getTitle())
-        .map(title -> title.toLowerCase())
-        .filter(title -> !title.contains("right version"))
-        .filter(title -> !title.contains("gachi"))
-        .filter(title -> !title.contains("гачи"))
-        .filter(title -> !title.contains("правильная версия"))
+        .filter(title -> settings.passWordsBlacklist(title))
         .isEmpty()
     ) {
       throw Problem
         .builder()
         .withTitle("Incorrect media")
         .withStatus(new HttpStatusType(HttpStatus.BAD_REQUEST))
-        .withDetail("Видео не должно быть гачи")
+        .withDetail("Видео содержит слова из черного списка")
         .build();
     }
     if (
@@ -132,21 +146,6 @@ public class NewVideoRequest {
         .withTitle("Incorrect media")
         .withStatus(new HttpStatusType(HttpStatus.BAD_REQUEST))
         .withDetail("Видео не должно быть 18+")
-        .build();
-    }
-    if (
-      Optional
-        .ofNullable(video.getContentDetails())
-        .map(ContentDetails::getRegionRestriction)
-        .map(RegionRestriction::getBlocked)
-        .map(it -> it.contains("RU"))
-        .orElse(false)
-    ) {
-      throw Problem
-        .builder()
-        .withTitle("Incorrect media")
-        .withStatus(new HttpStatusType(HttpStatus.BAD_REQUEST))
-        .withDetail("Видео заблокировано в РФ")
         .build();
     }
 

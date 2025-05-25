@@ -3,6 +3,8 @@ package io.github.stcarolas.oda.media.dto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.github.stcarolas.oda.media.repository.settings.MediaSettings;
+import io.github.stcarolas.oda.media.repository.settings.MediaSettingsRepository;
 import io.github.stcarolas.oda.media.video.NewVideoRequest;
 import io.micronaut.serde.annotation.Serdeable;
 
@@ -15,6 +17,7 @@ public class NewVideoRequestRestModel {
     "^((?:https?:)?\\/\\/)?((?:www|m)\\.)?((?:youtube(-nocookie)?\\.com|youtu.be))(\\/(?:[\\w\\-]+\\?v=|embed\\/|live\\/|v\\/)?)([\\w\\-]+)(\\S+)?$";
 
   private String url;
+  private String recipientId;
 
   public String getUrl() {
     return url;
@@ -24,7 +27,16 @@ public class NewVideoRequestRestModel {
     this.url = url;
   }
 
-  public NewVideoRequest asDomain() {
-    return new NewVideoRequest(url);
+  public String getRecipientId() {
+    return recipientId;
+  }
+
+  public void setRecipientId(String recipientId) {
+    this.recipientId = recipientId;
+  }
+
+  public NewVideoRequest asDomain(MediaSettingsRepository repository) {
+    final MediaSettings settings = repository.getByRecipientId(this.recipientId);
+    return new NewVideoRequest(url, settings);
   }
 }

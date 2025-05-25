@@ -1,6 +1,7 @@
 package io.github.stcarolas.oda.media;
 
 import io.github.stcarolas.oda.media.dto.NewVideoRequestRestModel;
+import io.github.stcarolas.oda.media.repository.settings.MediaSettingsRepository;
 import io.github.stcarolas.oda.media.video.Video;
 import io.github.stcarolas.oda.media.video.VideoRepository;
 import io.github.stcarolas.oda.media.video.prepared.PreparedVideo;
@@ -31,10 +32,13 @@ public class VideoController {
   @Inject
   VideoRepository repository;
 
+  @Inject
+  MediaSettingsRepository settings;
+
   @Put
   @Secured(SecurityRule.IS_ANONYMOUS)
   public PreparedVideo add(@Body NewVideoRequestRestModel request) {
-    PreparedVideo prepared = request.asDomain().prepare();
+    PreparedVideo prepared = request.asDomain(settings).prepare();
     prepared.save();
     return prepared;
   }

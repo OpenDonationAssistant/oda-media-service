@@ -10,6 +10,12 @@ import org.junit.jupiter.api.Test;
 
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 
+import io.github.opendonationassistant.media.youtube.ContentDetails;
+import io.github.opendonationassistant.media.youtube.Snippet;
+import io.github.opendonationassistant.media.youtube.Thumbnail;
+import io.github.opendonationassistant.media.youtube.Video;
+import io.github.opendonationassistant.media.youtube.Videos;
+import io.github.opendonationassistant.media.youtube.YouTube;
 import io.micronaut.context.annotation.Property;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import jakarta.inject.Inject;

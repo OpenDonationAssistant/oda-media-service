@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import javax.inject.Inject;
 
-import io.github.stcarolas.oda.Beans;
+import io.github.opendonationassistant.Beans;
 import io.micronaut.context.ApplicationContext;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import io.restassured.specification.RequestSpecification;

@@ -11,11 +11,11 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.github.stcarolas.oda.media.playlist.PlaylistItem;
-import io.github.stcarolas.oda.media.playlist.commands.CreatePlaylistCommand;
-import io.github.stcarolas.oda.media.playlist.commands.PlaylistCommandController;
-import io.github.stcarolas.oda.media.playlist.view.PlaylistController;
-import io.github.stcarolas.oda.media.playlist.view.PlaylistDto;
+import io.github.opendonationassistant.media.playlist.PlaylistItem;
+import io.github.opendonationassistant.media.playlist.commands.CreatePlaylistCommand;
+import io.github.opendonationassistant.media.playlist.commands.PlaylistCommandController;
+import io.github.opendonationassistant.media.playlist.view.PlaylistController;
+import io.github.opendonationassistant.media.playlist.view.PlaylistDto;
 import io.micronaut.data.model.Page;
 import io.micronaut.data.model.Pageable;
 import io.micronaut.security.authentication.Authentication;

@@ -21,7 +21,7 @@ public record MediaSettingsData(
   @MappedProperty("vkvideo_enabled") Boolean vkvideoEnabled,
   @MappedProperty("request_tooltip") String requestTooltip,
   @MappedProperty(
-    value = "wordsBlacklist",
+    value = "wordsblacklist",
     converter = StringListConverter.class
   )
   List<String> wordsBlacklist

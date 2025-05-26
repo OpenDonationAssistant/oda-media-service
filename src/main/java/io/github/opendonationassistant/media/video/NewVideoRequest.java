@@ -41,7 +41,7 @@ public class NewVideoRequest {
   }
 
   public PreparedVideo prepare() {
-    log.debug("preparing media by url: {}", url);
+    log.info("preparing media by url: {}", url);
     return url.contains("vkvideo.ru") ? preparedVk() : prepareYoutube();
   }
 

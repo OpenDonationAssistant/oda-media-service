@@ -1,6 +1,7 @@
 package io.github.opendonationassistant.media.video.prepared;
 
 import io.github.opendonationassistant.Beans;
+import io.github.opendonationassistant.commons.ToString;
 import io.github.opendonationassistant.media.video.Video;
 import io.github.opendonationassistant.media.video.VideoRepository;
 import io.github.opendonationassistant.media.video.ready.ReadyVideo;
@@ -29,6 +30,7 @@ public class PreparedVideo extends Video {
   }
 
   public void save() {
+    log.info("Saving prepared video: {}", ToString.asJson(this));
     Beans.get(VideoRepository.class).save(this);
   }
 

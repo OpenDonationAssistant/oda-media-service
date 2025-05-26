@@ -1,5 +1,6 @@
 package io.github.opendonationassistant.media.repository.settings;
 
+import io.github.opendonationassistant.commons.ToString;
 import io.github.opendonationassistant.events.config.ConfigCommandSender;
 import io.github.opendonationassistant.events.config.ConfigPutCommand;
 import io.github.opendonationassistant.events.widget.WidgetConfig;
@@ -7,7 +8,12 @@ import io.github.opendonationassistant.events.widget.WidgetProperty;
 import java.util.Arrays;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class MediaSettings {
+
+  private Logger log = LoggerFactory.getLogger(MediaSettings.class);
 
   private MediaSettingsData data;
   private MediaSettingsDataRepository repository;
@@ -29,8 +35,14 @@ public class MediaSettings {
 
   public void save() {
     this.repository.findById(data.id()).ifPresentOrElse(
-        old -> repository.update(data),
-        () -> repository.save(data)
+        old -> {
+          log.info("Updating settings: {}", data.id());
+          repository.update(data);
+        },
+        () -> {
+          log.info("Saving new settings:{}", ToString.asJson(data));
+          repository.save(data);
+        }
       );
   }
 
@@ -105,7 +117,7 @@ public class MediaSettings {
     command.setValue(requestsEnabled);
     configCommandSender.send(command);
 
-    this.repository.update(updated);
+    this.save();
     this.data = updated;
   }
 

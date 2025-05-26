@@ -59,6 +59,7 @@ public class MediaSettings {
     var requestsEnabled = get(config, "requestsEnabled")
       .map(property -> (Boolean) property.getValue())
       .orElse(true);
+
     var updated = new MediaSettingsData(
       data.id(),
       data.recipientId(),
@@ -82,6 +83,7 @@ public class MediaSettings {
           .split("\n")
       )
     );
+
     var command = new ConfigPutCommand();
     command.setOwnerId(this.data.recipientId());
     command.setName("paymentpage");
@@ -117,6 +119,7 @@ public class MediaSettings {
     command.setValue(requestsEnabled);
     configCommandSender.send(command);
 
+    this.update(updated);
     this.save();
     this.data = updated;
   }

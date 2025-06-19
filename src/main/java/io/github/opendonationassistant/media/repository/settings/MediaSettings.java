@@ -52,7 +52,7 @@ public class MediaSettings {
       .orElse("");
     var requestCost = get(config, "songRequestCost")
       .map(property -> (Integer) property.getValue())
-      .orElse(0);
+      .orElse(100);
     var maxAmount = get(config, "songMaxAmount")
       .map(property -> (Integer) property.getValue())
       .orElse(0);

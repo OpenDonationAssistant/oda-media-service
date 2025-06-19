@@ -6,8 +6,8 @@ import io.github.opendonationassistant.events.config.ConfigPutCommand;
 import io.github.opendonationassistant.events.widget.WidgetConfig;
 import io.github.opendonationassistant.events.widget.WidgetProperty;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -124,7 +124,7 @@ public class MediaSettings {
     this.data = updated;
   }
 
-  public MediaSettingsData getData(){
+  public MediaSettingsData getData() {
     return this.data;
   }
 
@@ -142,8 +142,8 @@ public class MediaSettings {
   }
 
   private Optional<WidgetProperty> get(WidgetConfig config, String property) {
-    return config
-      .getProperties()
+    return Optional.ofNullable(config.getProperties())
+      .orElse(List.of())
       .stream()
       .filter(it -> property.equals(it.getName()))
       .findFirst();

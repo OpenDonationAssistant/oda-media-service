@@ -11,6 +11,8 @@ import io.micronaut.http.HttpResponse;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Get;
 import io.micronaut.http.annotation.QueryValue;
+import io.micronaut.scheduling.TaskExecutors;
+import io.micronaut.scheduling.annotation.ExecuteOn;
 import io.micronaut.security.annotation.Secured;
 import io.micronaut.security.rules.SecurityRule;
 
@@ -33,6 +35,7 @@ public class AvailableMediaController {
 
   @Get
   @Secured(SecurityRule.IS_ANONYMOUS)
+  @ExecuteOn(TaskExecutors.BLOCKING)
   public HttpResponse<java.util.List<Video>> available(
     @Nullable @QueryValue("query") String query,
     @Nullable @QueryValue("playlistId") String playlistId,

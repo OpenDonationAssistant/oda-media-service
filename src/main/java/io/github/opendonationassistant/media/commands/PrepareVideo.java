@@ -91,6 +91,7 @@ public class PrepareVideo {
     var originId = url.replaceAll("https://vkvideo.ru/video", "");
     return vk
       .getEmbeddedInfo(Map.of("url", url, "v", "5.199"))
+      .thenApply(response -> response.response())
       .thenApply(embeddedInfo -> {
         log.debug("Got vk video info", Map.of("info", embeddedInfo));
         if (!settings.passWordsBlacklist(embeddedInfo.title())) {

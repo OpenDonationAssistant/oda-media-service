@@ -4,39 +4,39 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.List;
-import java.util.Map;
-
-import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import io.github.opendonationassistant.media.playlist.PlaylistItem;
-import io.github.opendonationassistant.media.playlist.commands.CreatePlaylistCommand;
-import io.github.opendonationassistant.media.playlist.commands.PlaylistCommandController;
-import io.github.opendonationassistant.media.playlist.view.PlaylistController;
-import io.github.opendonationassistant.media.playlist.view.PlaylistDto;
+import io.github.opendonationassistant.playlist.commands.CreatePlaylist;
+import io.github.opendonationassistant.playlist.commands.CreatePlaylist.CreatePlaylistCommand;
+import io.github.opendonationassistant.playlist.repository.PlaylistData.PlaylistItem;
+import io.github.opendonationassistant.playlist.view.PlaylistController;
+import io.github.opendonationassistant.playlist.view.PlaylistDto;
 import io.micronaut.data.model.Page;
 import io.micronaut.data.model.Pageable;
 import io.micronaut.security.authentication.Authentication;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import jakarta.inject.Inject;
+import java.util.List;
+import java.util.Map;
+import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @MicronautTest(environments = "allinone")
 public class SaveAndLoadPlaylistTest {
+
   private Logger log = LoggerFactory.getLogger(SaveAndLoadPlaylistTest.class);
 
   @Inject
   PlaylistController playlistController;
 
   @Inject
-  PlaylistCommandController commandController;
+  CreatePlaylist createPlaylist;
 
   @Test
   public void testSaveAndLoadPlaylist() {
     Authentication auth = mock(Authentication.class);
-    when(auth.getAttributes())
-      .thenReturn(Map.of("preferred_username", "testuser"));
+    when(auth.getAttributes()).thenReturn(
+      Map.of("preferred_username", "testuser")
+    );
 
     CreatePlaylistCommand command = new CreatePlaylistCommand(
       "testplaylist",
@@ -44,12 +44,15 @@ public class SaveAndLoadPlaylistTest {
         new PlaylistItem("test", "https://www.youtube.com/watch?v=VJtg7pJO3hQ")
       )
     );
-    final PlaylistDto created = commandController.create(auth, command);
+    final PlaylistDto created = createPlaylist
+      .create(auth, command)
+      .getBody()
+      .get();
 
-    final Page<PlaylistDto> page = playlistController.playlists(
-      auth,
-      Pageable.from(0, 10)
-    );
+    final Page<PlaylistDto> page = playlistController
+      .playlists(auth, Pageable.from(0, 10))
+      .getBody()
+      .get();
     log.info("{}", page);
     assertEquals(1, page.getTotalSize());
 

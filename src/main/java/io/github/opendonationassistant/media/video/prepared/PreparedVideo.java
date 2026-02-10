@@ -1,49 +1,41 @@
 package io.github.opendonationassistant.media.video.prepared;
 
-import io.github.opendonationassistant.Beans;
 import io.github.opendonationassistant.commons.ToString;
-import io.github.opendonationassistant.media.video.Video;
-import io.github.opendonationassistant.media.video.VideoRepository;
+import io.github.opendonationassistant.media.repository.VideoData;
+import io.github.opendonationassistant.media.repository.VideoDataRepository;
+import io.github.opendonationassistant.media.senders.ReadyVideoNotificationSender;
 import io.github.opendonationassistant.media.video.ready.ReadyVideo;
-import io.github.opendonationassistant.media.video.ready.ReadyVideoNotificationSender;
-import io.micronaut.serde.annotation.Serdeable;
-import java.time.Instant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Serdeable
-public class PreparedVideo extends Video {
+public class PreparedVideo {
 
   private Logger log = LoggerFactory.getLogger(ReadyVideo.class);
+  private final VideoData data;
+  private final VideoDataRepository repository;
+  private final ReadyVideoNotificationSender notificationSender;
 
-  public static PreparedVideo from(Video origin) {
-    var video = new PreparedVideo();
-    video.setId(origin.getId());
-    video.setUrl(origin.getUrl());
-    video.setOwner(origin.getOwner());
-    video.setTitle(origin.getTitle());
-    video.setOriginId(origin.getOriginId());
-    video.setThumbnail(origin.getThumbnail());
-    video.setRecipientId(origin.getRecipientId());
-    video.setProvider(origin.getProvider());
-    return video;
+  public PreparedVideo(
+    VideoData data,
+    VideoDataRepository repository,
+    ReadyVideoNotificationSender notificationSender
+  ) {
+    this.data = data;
+    this.repository = repository;
+    this.notificationSender = notificationSender;
   }
 
   public void save() {
     log.info("Saving prepared video: {}", ToString.asJson(this));
-    Beans.get(VideoRepository.class).save(this);
+    repository.update(data);
   }
 
   public ReadyVideo makeReady(String owner, String recipient) {
-    log.info("Make {} ready", getId());
-    var video = ReadyVideo.from(this, Instant.now());
-    video.setOwner(owner);
-    video.setRecipientId(recipient);
-    Beans.get(VideoRepository.class).update(video);
-    ReadyVideoNotificationSender sender = Beans.get(
-      ReadyVideoNotificationSender.class
-    );
-    sender.send("%smedia".formatted(recipient), video);
+    log.info("Make {} ready", data.id());
+    var updateData = data.withOwner(owner).withRecipientId(recipient);
+    repository.update(updateData);
+    var video = new ReadyVideo(updateData, repository);
+    notificationSender.send("%smedia".formatted(recipient), video);
     return video;
   }
 }

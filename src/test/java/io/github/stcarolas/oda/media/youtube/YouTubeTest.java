@@ -4,21 +4,19 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.HashMap;
-
-import org.junit.jupiter.api.Test;
-
-import com.github.tomakehurst.wiremock.junit5.WireMockTest;
-
-import io.github.opendonationassistant.media.youtube.ContentDetails;
-import io.github.opendonationassistant.media.youtube.Snippet;
-import io.github.opendonationassistant.media.youtube.Thumbnail;
-import io.github.opendonationassistant.media.youtube.Video;
-import io.github.opendonationassistant.media.youtube.Videos;
-import io.github.opendonationassistant.media.youtube.YouTube;
+import io.github.opendonationassistant.integration.youtube.ContentDetails;
+import io.github.opendonationassistant.integration.youtube.Snippet;
+import io.github.opendonationassistant.integration.youtube.Thumbnail;
+import io.github.opendonationassistant.integration.youtube.Video;
+import io.github.opendonationassistant.integration.youtube.Videos;
+import io.github.opendonationassistant.integration.youtube.YouTube;
 import io.micronaut.context.annotation.Property;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import jakarta.inject.Inject;
+import java.util.HashMap;
+import org.junit.jupiter.api.Test;
+
+import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 
 @MicronautTest(environments = "allinone")
 @Property(name = "youtube.key", value = "test")
@@ -50,9 +48,11 @@ public class YouTubeTest {
     assertNotNull(thumbnails);
     Thumbnail defaultThumb = thumbnails.get("default");
     assertNotNull(defaultThumb);
-    assertEquals("https://i.ytimg.com/vi/z4FWUtsni7g/default.jpg", defaultThumb.getUrl());
+    assertEquals(
+      "https://i.ytimg.com/vi/z4FWUtsni7g/default.jpg",
+      defaultThumb.getUrl()
+    );
     ContentDetails contentDetails = video.getContentDetails();
     assertNotNull(contentDetails);
   }
-
 }

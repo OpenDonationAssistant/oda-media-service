@@ -1,11 +1,11 @@
 package io.github.opendonationassistant.media;
 
-import io.github.opendonationassistant.media.youtube.PlaylistItem;
-import io.github.opendonationassistant.media.youtube.PlaylistItemList;
-import io.github.opendonationassistant.media.youtube.SearchResult;
-import io.github.opendonationassistant.media.youtube.Video;
-import io.github.opendonationassistant.media.youtube.Videos;
-import io.github.opendonationassistant.media.youtube.YouTube;
+import io.github.opendonationassistant.integration.youtube.PlaylistItem;
+import io.github.opendonationassistant.integration.youtube.PlaylistItemList;
+import io.github.opendonationassistant.integration.youtube.SearchResult;
+import io.github.opendonationassistant.integration.youtube.Video;
+import io.github.opendonationassistant.integration.youtube.Videos;
+import io.github.opendonationassistant.integration.youtube.YouTube;
 import io.micronaut.core.annotation.Nullable;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.annotation.Controller;
@@ -15,21 +15,20 @@ import io.micronaut.scheduling.TaskExecutors;
 import io.micronaut.scheduling.annotation.ExecuteOn;
 import io.micronaut.security.annotation.Secured;
 import io.micronaut.security.rules.SecurityRule;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Controller("/media/available")
 public class AvailableMediaController {
+
   private Logger log = LoggerFactory.getLogger(AvailableMediaController.class);
 
   private final YouTube youTube;
 
-  public AvailableMediaController(YouTube youTube){
+  public AvailableMediaController(YouTube youTube) {
     this.youTube = youTube;
   }
 
@@ -46,12 +45,15 @@ public class AvailableMediaController {
       List<SearchResult> results = youTube.search(query).getItems();
       log.debug("search results: {}", results);
       allVideos.addAll(
-        results.stream().map(result -> {
-          var video = new Video();
-          video.setId(result.getId().getVideoId());
-          video.setSnippet(result.getSnippet());
-          return video;
-        }).toList()
+        results
+          .stream()
+          .map(result -> {
+            var video = new Video();
+            video.setId(result.getId().getVideoId());
+            video.setSnippet(result.getSnippet());
+            return video;
+          })
+          .toList()
       );
     }
     if (Objects.nonNull(playlistId)) {
@@ -71,12 +73,15 @@ public class AvailableMediaController {
       }
       log.debug("Playlist videos: {}", videos);
       allVideos.addAll(
-        videos.stream().map(item -> {
-          Video video = new Video();
-          video.setId(item.getSnippet().getResourceId().getVideoId());
-          video.setSnippet(item.getSnippet());
-          return video;
-        }).toList()
+        videos
+          .stream()
+          .map(item -> {
+            Video video = new Video();
+            video.setId(item.getSnippet().getResourceId().getVideoId());
+            video.setSnippet(item.getSnippet());
+            return video;
+          })
+          .toList()
       );
     }
     if (Objects.nonNull(videoId)) {

@@ -5,3 +5,5 @@ datasources:
 logger:
   levels:
     io.github.stcarolas: DEBUG
+youtube:
+  key: test

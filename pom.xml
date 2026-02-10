@@ -3,40 +3,36 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.github.opendonationassistant</groupId>
   <artifactId>oda-media-service</artifactId>
-  <version>0.5.0</version>
+  <version>0.6.0</version>
   <packaging>${packaging}</packaging>
   <parent>
     <groupId>io.micronaut.platform</groupId>
     <artifactId>micronaut-parent</artifactId>
-    <version>4.2.3</version>
+    <version>4.10.6</version>
   </parent>
   <properties>
     <packaging>jar</packaging>
-    <jdk.version>17</jdk.version>
-    <release.version>17</release.version>
-    <micronaut.version>4.2.3</micronaut.version>
+    <jdk.version>25</jdk.version>
+    <release.version>25</release.version>
     <micronaut.runtime>netty</micronaut.runtime>
     <micronaut.test.resources.enabled>true</micronaut.test.resources.enabled>
     <micronaut.aot.enabled>false</micronaut.aot.enabled>
     <micronaut.aot.packageName>io.github.opendonationassistant.aot.generated</micronaut.aot.packageName>
     <exec.mainClass>io.github.opendonationassistant.Application</exec.mainClass>
   </properties>
+
   <repositories>
     <repository>
       <id>central</id>
       <url>https://repo.maven.apache.org/maven2</url>
     </repository>
   </repositories>
+
   <dependencies>
     <dependency>
       <groupId>io.github.opendonationassistant</groupId>
       <artifactId>oda-rabbit-conf</artifactId>
-      <version>0.7.36</version>
-    </dependency>
-    <dependency>
-      <groupId>io.github.opendonationassistant</groupId>
-      <artifactId>oda-commons</artifactId>
-      <version>0.7.36</version>
+      <version>0.9.137</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.uuid</groupId>
@@ -47,7 +43,6 @@
       <groupId>io.micronaut.problem</groupId>
       <artifactId>micronaut-problem-json</artifactId>
     </dependency>
-    <!-- #region http-server -->
     <dependency>
       <groupId>io.micronaut</groupId>
       <artifactId>micronaut-http-server-netty</artifactId>
@@ -56,11 +51,6 @@
       <groupId>io.micronaut</groupId>
       <artifactId>micronaut-http-client-jdk</artifactId>
       <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>javax.inject</groupId>
-      <artifactId>javax.inject</artifactId>
-      <version>1</version>
     </dependency>
     <dependency>
       <groupId>io.micronaut</groupId>
@@ -75,8 +65,6 @@
       <groupId>io.micronaut</groupId>
       <artifactId>micronaut-jackson-databind</artifactId>
     </dependency>
-    <!-- #endregion -->
-    <!-- #region security -->
     <dependency>
       <groupId>io.micronaut.security</groupId>
       <artifactId>micronaut-security-jwt</artifactId>
@@ -87,11 +75,14 @@
       <artifactId>micronaut-security-oauth2</artifactId>
       <scope>compile</scope>
     </dependency>
-    <!-- #endregion security -->
-    <!-- #region sql-->
     <dependency>
       <groupId>io.micronaut.flyway</groupId>
       <artifactId>micronaut-flyway</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.flywaydb</groupId>
+      <artifactId>flyway-database-postgresql</artifactId>
+      <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>org.postgresql</groupId>
@@ -108,8 +99,6 @@
       <artifactId>micronaut-jdbc-hikari</artifactId>
       <scope>runtime</scope>
     </dependency>
-    <!-- #endregion -->
-    <!-- #region test -->
     <dependency>
       <groupId>org.instancio</groupId>
       <artifactId>instancio-core</artifactId>
@@ -143,7 +132,13 @@
     <dependency>
       <groupId>org.wiremock</groupId>
       <artifactId>wiremock</artifactId>
-      <version>3.3.1</version>
+      <version>4.0.0-beta.28</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.wiremock</groupId>
+      <artifactId>wiremock-junit5</artifactId>
+      <version>4.0.0-beta.28</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -152,8 +147,6 @@
       <version>5.12.0</version>
       <scope>test</scope>
     </dependency>
-    <!-- #endregion test -->
-    <!-- #region tools -->
     <dependency>
       <groupId>io.micronaut.openapi</groupId>
       <artifactId>micronaut-openapi-annotations</artifactId>
@@ -169,12 +162,16 @@
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
     </dependency>
-    <!-- #endregion tools -->
+    <dependency>
+      <groupId>io.micronaut.micrometer</groupId>
+      <artifactId>micronaut-micrometer-registry-prometheus</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.micronaut</groupId>
+      <artifactId>micronaut-management</artifactId>
+    </dependency>
   </dependencies>
-  <!--#endregion-->
-  <!-- #region build -->
   <build>
-    <!--#region plugins-->
     <plugins>
       <plugin>
         <groupId>io.micronaut.maven</groupId>
@@ -189,10 +186,6 @@
           </aotDependencies>
           <configFile>aot-${packaging}.properties</configFile>
         </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-enforcer-plugin</artifactId>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -265,8 +258,25 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>0.8.14</version>
+        <executions>
+          <execution>
+            <id>prepare-agent</id>
+            <goals>
+              <goal>prepare-agent</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>report</id>
+            <goals>
+              <goal>report</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
-    <!--#endregion-->
   </build>
-  <!--#endregion-->
 </project>

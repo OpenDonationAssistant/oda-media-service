@@ -21,6 +21,8 @@ import io.micronaut.security.annotation.Secured;
 import io.micronaut.security.rules.SecurityRule;
 import io.micronaut.serde.annotation.Serdeable;
 import jakarta.inject.Inject;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -106,10 +108,16 @@ public class PrepareVideo {
         try {
           final DocumentBuilder builder = DocumentBuilderFactory.newInstance()
             .newDocumentBuilder();
-          src = builder
-            .parse(embeddedInfo.html())
-            .getDocumentElement()
-            .getAttribute("src");
+          try (
+            InputStream inputStream = new ByteArrayInputStream(
+              embeddedInfo.html().getBytes()
+            )
+          ) {
+            src = builder
+              .parse(inputStream)
+              .getDocumentElement()
+              .getAttribute("src");
+          }
         } catch (Exception e) {
           log.debug(
             "Failed to parse html",

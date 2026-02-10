@@ -111,6 +111,10 @@ public class PrepareVideo {
             .getDocumentElement()
             .getAttribute("src");
         } catch (Exception e) {
+          log.debug(
+            "Failed to parse html",
+            Map.of("html", embeddedInfo.html(), "error", e.getMessage())
+          );
           throw Problem.builder()
             .withTitle("Incorrect media")
             .withStatus(new HttpStatusType(HttpStatus.BAD_REQUEST))

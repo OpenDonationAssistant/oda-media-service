@@ -16,7 +16,7 @@ public interface VKApi {
     consumes = MediaType.APPLICATION_JSON,
     produces = MediaType.APPLICATION_FORM_URLENCODED
   )
-  CompletableFuture<EmbeddedInfo> getEmbeddedInfo(
+  CompletableFuture<Response> getEmbeddedInfo(
     @Body Map<String, String> request
   );
 

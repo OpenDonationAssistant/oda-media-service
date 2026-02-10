@@ -92,6 +92,7 @@ public class PrepareVideo {
     return vk
       .getEmbeddedInfo(Map.of("url", url))
       .thenApply(embeddedInfo -> {
+        log.debug("Got vk video info", Map.of("info", embeddedInfo));
         if (!settings.passWordsBlacklist(embeddedInfo.title())) {
           throw Problem.builder()
             .withTitle("Incorrect media")

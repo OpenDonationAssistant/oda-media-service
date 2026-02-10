@@ -13,7 +13,8 @@ import java.util.concurrent.CompletableFuture;
 public interface VKApi {
   @Post(
     value = "/method/video.getOembed",
-    produces = MediaType.APPLICATION_FORM_URLENCODED
+    consumes = MediaType.APPLICATION_FORM_URLENCODED,
+    produces = MediaType.APPLICATION_JSON
   )
   CompletableFuture<EmbeddedInfo> getEmbeddedInfo(
     @Body Map<String, String> request

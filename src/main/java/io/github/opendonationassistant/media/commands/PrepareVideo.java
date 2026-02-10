@@ -26,6 +26,10 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import org.w3c.dom.Document;
 import org.zalando.problem.Problem;
 
 @Controller
@@ -96,11 +100,27 @@ public class PrepareVideo {
             .build();
         }
 
+        String src;
+        try {
+          final DocumentBuilder builder = DocumentBuilderFactory.newInstance()
+            .newDocumentBuilder();
+          src = builder
+            .parse(embeddedInfo.html())
+            .getDocumentElement()
+            .getAttribute("src");
+        } catch (Exception e) {
+          throw Problem.builder()
+            .withTitle("Incorrect media")
+            .withStatus(new HttpStatusType(HttpStatus.BAD_REQUEST))
+            .withDetail("Невозможно распознать видео")
+            .build();
+        }
+
         return new VideoData(
           id,
           originId,
           "vk",
-          embeddedInfo.html(),
+          src,
           embeddedInfo.title(),
           embeddedInfo.thumbnailUrl(),
           "prepared",

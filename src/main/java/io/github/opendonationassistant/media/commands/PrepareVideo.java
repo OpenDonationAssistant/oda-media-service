@@ -90,7 +90,7 @@ public class PrepareVideo {
     var id = Generators.timeBasedEpochGenerator().generate().toString();
     var originId = url.replaceAll("https://vkvideo.ru/video", "");
     return vk
-      .getEmbeddedInfo(Map.of("url", url))
+      .getEmbeddedInfo(Map.of("url", url, "v", "5.199"))
       .thenApply(embeddedInfo -> {
         log.debug("Got vk video info", Map.of("info", embeddedInfo));
         if (!settings.passWordsBlacklist(embeddedInfo.title())) {

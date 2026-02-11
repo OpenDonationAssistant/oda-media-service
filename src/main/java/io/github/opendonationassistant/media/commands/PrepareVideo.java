@@ -40,7 +40,7 @@ public class PrepareVideo {
   );
 
   public static final Pattern srcPattern = Pattern.compile(
-    ".*src=\"(.*)\".*",
+    ".*src=\\\"(.*)\\\".*",
     Pattern.MULTILINE
   );
 

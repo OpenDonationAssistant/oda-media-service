@@ -1,6 +1,9 @@
 package io.github.stcarolas.oda.media;
 
 import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.regex.Pattern;
 
 import io.micronaut.context.ApplicationContext;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
@@ -14,6 +17,18 @@ public class VideoControllerTest {
 
   @Inject
   ApplicationContext context;
+
+  // @Test
+  // public void testSrcRegexp() {
+  //       final String regex = ".*src=\\\"(.*)\\\".*";
+  //       final String html = "<iframe\n  src=\"https://vk.com/video_ext.php?oid=-48229771&id=456239600&hash=03ba5ea3f2e7c813&__ref=vk.web2\"\n  width=\"853\"\n  height=\"480\"\n  allow=\"autoplay; encrypted-media; fullscreen; picture-in-picture; screen-wake-lock;\"\n  frameborder=\"0\"\n  allowfullscreen></iframe>";
+  //       final Pattern srcPattern = Pattern.compile(
+  //         ".*src=\\\"(.*)\\\".*",
+  //         Pattern.MULTILINE
+  //       );
+  //       var matcher = srcPattern.matcher(html.replaceAll("\\n", ""));
+  //       assertTrue(matcher.matches());
+  // }
 
   @Test
   @Disabled

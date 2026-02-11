@@ -103,7 +103,7 @@ public class PrepareVideo {
             .build();
         }
 
-        var matcher = srcPattern.matcher(embeddedInfo.html());
+        var matcher = srcPattern.matcher(embeddedInfo.html().replaceAll("\\n", ""));
         if (!matcher.matches()) {
           throw Problem.builder()
             .withTitle("Incorrect media")

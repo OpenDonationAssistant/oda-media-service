@@ -8,6 +8,7 @@ import io.github.opendonationassistant.integration.youtube.Video;
 import io.github.opendonationassistant.integration.youtube.Videos;
 import io.github.opendonationassistant.integration.youtube.YouTube;
 import io.github.opendonationassistant.media.repository.VideoData;
+import io.github.opendonationassistant.media.repository.VideoDataRepository;
 import io.github.opendonationassistant.settings.repository.MediaSettings;
 import io.github.opendonationassistant.settings.repository.MediaSettingsRepository;
 import io.micronaut.core.util.StringUtils;
@@ -49,16 +50,19 @@ public class PrepareVideo {
   private final YouTube youTube;
   private final VKApi vk;
   private final MediaSettingsRepository repository;
+  private final VideoDataRepository videoRepository;
 
   @Inject
   public PrepareVideo(
     YouTube youTube,
     VKApi vk,
-    MediaSettingsRepository repository
+    MediaSettingsRepository repository,
+    VideoDataRepository videoRepository
   ) {
     this.youTube = youTube;
     this.vk = vk;
     this.repository = repository;
+    this.videoRepository = videoRepository;
   }
 
   @Put("/media/video")
@@ -74,7 +78,9 @@ public class PrepareVideo {
       command.url().contains("vkvideo.ru")
         ? prepareVk(settings, command.url())
         : prepareYoutube(settings, command.url())
-    ).thenApply(HttpResponse::ok);
+    )
+      .thenApply(videoRepository::save)
+      .thenApply(HttpResponse::ok);
   }
 
   private CompletableFuture<VideoData> prepareVk(
@@ -103,7 +109,9 @@ public class PrepareVideo {
             .build();
         }
 
-        var matcher = srcPattern.matcher(embeddedInfo.html().replaceAll("\\n", ""));
+        var matcher = srcPattern.matcher(
+          embeddedInfo.html().replaceAll("\\n", "")
+        );
         if (!matcher.matches()) {
           throw Problem.builder()
             .withTitle("Incorrect media")

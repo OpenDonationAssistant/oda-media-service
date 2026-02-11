@@ -1,16 +1,15 @@
 package io.github.opendonationassistant.media.video.prepared;
 
-import io.github.opendonationassistant.commons.ToString;
+import io.github.opendonationassistant.commons.logging.ODALogger;
 import io.github.opendonationassistant.media.repository.VideoData;
 import io.github.opendonationassistant.media.repository.VideoDataRepository;
 import io.github.opendonationassistant.media.senders.ReadyVideoNotificationSender;
 import io.github.opendonationassistant.media.video.ready.ReadyVideo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.Map;
 
 public class PreparedVideo {
 
-  private Logger log = LoggerFactory.getLogger(ReadyVideo.class);
+  private static final ODALogger log = new ODALogger(PreparedVideo.class);
   private final VideoData data;
   private final VideoDataRepository repository;
   private final ReadyVideoNotificationSender notificationSender;
@@ -26,12 +25,12 @@ public class PreparedVideo {
   }
 
   public void save() {
-    log.info("Saving prepared video: {}", ToString.asJson(this));
+    log.info("Saving prepared video", Map.of("video", data));
     repository.update(data);
   }
 
   public ReadyVideo makeReady(String owner, String recipient) {
-    log.info("Make {} ready", data.id());
+    log.info("Make video ready", Map.of("id", data.id()));
     var updateData = data.withOwner(owner).withRecipientId(recipient);
     repository.update(updateData);
     var video = new ReadyVideo(updateData, repository);

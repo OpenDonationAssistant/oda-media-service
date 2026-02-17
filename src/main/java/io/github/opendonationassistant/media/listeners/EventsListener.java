@@ -1,8 +1,8 @@
 package io.github.opendonationassistant.media.listeners;
 
-import io.github.opendonationassistant.events.CompletedPaymentNotification;
+import io.github.opendonationassistant.events.history.event.HistoryItemEvent;
 import io.github.opendonationassistant.media.repository.VideoRepository;
-import io.github.opendonationassistant.rabbit.Queue.Payments;
+import io.github.opendonationassistant.rabbit.Queue.Media;
 import io.micronaut.messaging.annotation.MessageHeader;
 import io.micronaut.rabbitmq.annotation.Queue;
 import io.micronaut.rabbitmq.annotation.RabbitListener;
@@ -22,7 +22,7 @@ public class EventsListener {
     this.repository = repository;
   }
 
-  @Queue(Payments.MEDIA)
+  @Queue(Media.EVENTS)
   @Transactional
   public void listenMediaEvents(
     @MessageHeader("type") String type,
@@ -30,22 +30,23 @@ public class EventsListener {
     RabbitAcknowledgement acknowledgement
   ) throws IOException {
     switch (type) {
-      case "PaymentEvent":
+      case "HistoryItemEvent":
         var notification = ObjectMapper.getDefault()
-          .readValue(data, CompletedPaymentNotification.class);
-        notification
-          .attachments()
-          .stream()
-          .flatMap(id -> {
-            return repository.findPreparedVideo(id).stream();
-          })
-          .forEach(video ->
-            video.makeReady(notification.nickname(), notification.recipientId())
-          );
+          .readValue(data, HistoryItemEvent.class);
+        repository
+          .findPreparedVideosForPayment(notification.originId())
+          .thenAccept(videos -> {
+            videos.forEach(video ->
+              video.makeReady(
+                notification.nickname(),
+                notification.recipientId()
+              )
+            );
+            acknowledgement.ack();
+          });
         break;
       default:
         break;
     }
-    acknowledgement.ack();
   }
 }

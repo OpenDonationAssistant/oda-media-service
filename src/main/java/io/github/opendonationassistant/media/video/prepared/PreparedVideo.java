@@ -10,7 +10,7 @@ import java.util.Map;
 public class PreparedVideo {
 
   private static final ODALogger log = new ODALogger(PreparedVideo.class);
-  private final VideoData data;
+  private VideoData data;
   private final VideoDataRepository repository;
   private final ReadyVideoNotificationSender notificationSender;
 
@@ -22,6 +22,11 @@ public class PreparedVideo {
     this.data = data;
     this.repository = repository;
     this.notificationSender = notificationSender;
+  }
+
+  public void linkPayment(String paymentId) {
+    this.data = data.withPaymentId(paymentId);
+    this.save();
   }
 
   public void save() {

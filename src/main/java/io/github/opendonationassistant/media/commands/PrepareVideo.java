@@ -78,9 +78,7 @@ public class PrepareVideo {
       command.url().contains("vkvideo.ru")
         ? prepareVk(settings, command.url())
         : prepareYoutube(settings, command.url())
-    )
-      .thenApply(videoRepository::save)
-      .thenApply(HttpResponse::ok);
+    ).thenApply(videoRepository::save).thenApply(HttpResponse::ok);
   }
 
   private CompletableFuture<VideoData> prepareVk(
@@ -129,6 +127,7 @@ public class PrepareVideo {
           embeddedInfo.title(),
           embeddedInfo.thumbnailUrl(),
           "prepared",
+          null,
           null,
           null,
           null
@@ -228,6 +227,7 @@ public class PrepareVideo {
         video.getSnippet().getTitle(),
         video.getSnippet().getThumbnails().get("default").getUrl(),
         "prepared",
+        null,
         null,
         null,
         null

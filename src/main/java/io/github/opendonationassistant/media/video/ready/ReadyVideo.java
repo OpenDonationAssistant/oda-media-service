@@ -20,9 +20,14 @@ public class ReadyVideo {
     repository.update(data);
   }
 
-  public void makeHandled() {
+  public ReadyVideo makeHandled() {
     log.info("Make video handled", Map.of("id", data.id()));
     this.data = data.withStatus("handled");
     this.save();
+    return this;
+  }
+
+  public VideoData data() {
+    return this.data;
   }
 }

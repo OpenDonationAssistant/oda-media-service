@@ -40,8 +40,11 @@ public class VideoRepository {
   }
 
   public CompletableFuture<List<PreparedVideo>> findPreparedVideosForPayment(
-    String paymentId
+    @Nullable String paymentId
   ) {
+    if (paymentId == null) {
+      return CompletableFuture.completedFuture(List.of());
+    }
     return dataRepository
       .findByPaymentId(paymentId)
       .thenApply(videos ->

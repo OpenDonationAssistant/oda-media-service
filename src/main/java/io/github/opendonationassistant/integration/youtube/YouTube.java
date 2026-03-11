@@ -8,10 +8,16 @@ import jakarta.inject.Singleton;
 public class YouTube {
 
   @Value("${youtube.key}")
-  protected String key;
+  private String key;
 
   @Inject
-  protected YouTubeLowLevelApi api;
+  private YouTubeLowLevelApi api;
+
+  @Inject
+  public YouTube(@Value("${youtube.key}") String key, YouTubeLowLevelApi api) {
+    this.key = key;
+    this.api = api;
+  }
 
   public Videos list(String id) {
     return api.list(id, key);

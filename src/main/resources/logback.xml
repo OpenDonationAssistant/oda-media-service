@@ -2,10 +2,14 @@
 <configuration>
   <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
     <encoder>
-      <pattern>%cyan(%d{HH:mm:ss.SSS}) %highlight(%-5level) %magenta(%logger{36}) - %replace(%msg){'\n'," "}%n</pattern>
+      <pattern>{"timestamp":"%d{HH:mm:ss.SSS}","level":"%level","logger":"%logger","context":[%X{context}],"message": "%replace(%replace(%msg){'\"','\\"'}){'\n',\" \"}"}%n</pattern>
     </encoder>
   </appender>
-  <root level="INFO">
+  <logger name="org.flywaydb.core" level="WARN"/>
+  <logger name="com.zaxxer.hikari" level="WARN"/>
+  <logger name="io.micronaut.logging.PropertiesLoggingLevelsConfigurer" level="WARN"/>
+  <logger name="io.micronaut.flyway.AbstractFlywayMigration" level="WARN"/>
+  <root level="info">
     <appender-ref ref="STDOUT"/>
   </root>
 </configuration>

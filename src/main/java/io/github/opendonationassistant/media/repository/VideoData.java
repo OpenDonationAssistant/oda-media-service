@@ -4,8 +4,9 @@ import io.micronaut.data.annotation.Id;
 import io.micronaut.data.annotation.MappedEntity;
 import io.micronaut.serde.annotation.Serdeable;
 import io.micronaut.sourcegen.annotations.Wither;
-import jakarta.annotation.Nullable;
 import java.time.Instant;
+
+import org.jspecify.annotations.Nullable;
 
 @Serdeable
 @MappedEntity("video")

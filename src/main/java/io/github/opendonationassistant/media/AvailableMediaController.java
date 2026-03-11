@@ -18,6 +18,7 @@ import io.micronaut.security.rules.SecurityRule;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,25 +43,33 @@ public class AvailableMediaController {
   ) {
     List<Video> allVideos = new ArrayList<>();
     if (Objects.nonNull(query)) {
-      List<SearchResult> results = youTube.search(query).getItems();
+      List<SearchResult> results = Optional.ofNullable(
+        youTube.search(query).items()
+      ).orElse(List.of());
       log.debug("search results: {}", results);
       allVideos.addAll(
         results
           .stream()
-          .map(result -> {
-            var video = new Video();
-            video.setId(result.getId().getVideoId());
-            video.setSnippet(result.getSnippet());
-            return video;
-          })
+          .map(result ->
+            new Video(
+              Optional.ofNullable(result.id())
+                .map(it -> it.videoId())
+                .orElseThrow(),
+              result.snippet(),
+              null,
+              null
+            )
+          )
           .toList()
       );
     }
     if (Objects.nonNull(playlistId)) {
       log.debug("Getting items from playlist with id : {}", playlistId);
       PlaylistItemList page = youTube.playlistItems(playlistId, "");
-      List<PlaylistItem> videos = page.getItems();
-      String nextPage = page.getNextPageToken();
+      List<PlaylistItem> videos = Optional.ofNullable(page.items()).orElse(
+        new ArrayList<>()
+      );
+      String nextPage = page.nextPageToken();
       while (Objects.nonNull(nextPage)) {
         log.debug(
           "Getting page of items from playlist with id : {} and page token: {}",
@@ -68,29 +77,34 @@ public class AvailableMediaController {
           nextPage
         );
         page = youTube.playlistItems(playlistId, nextPage);
-        nextPage = page.getNextPageToken();
-        videos.addAll(page.getItems());
+        nextPage = page.nextPageToken();
+        videos.addAll(page.items());
       }
       log.debug("Playlist videos: {}", videos);
       allVideos.addAll(
         videos
           .stream()
-          .map(item -> {
-            Video video = new Video();
-            video.setId(item.getSnippet().getResourceId().getVideoId());
-            video.setSnippet(item.getSnippet());
-            return video;
-          })
+          .map(item ->
+            new Video(
+              Optional.ofNullable(item.snippet())
+                .map(it -> it.resourceId())
+                .map(it -> it.videoId())
+                .orElseThrow(),
+              item.snippet(),
+              null,
+              null
+            )
+          )
           .toList()
       );
     }
     if (Objects.nonNull(videoId)) {
       Videos found = youTube.list(videoId);
-      if (found.getItems() == null || found.getItems().isEmpty()) {
+      if (found.items() == null || found.items().isEmpty()) {
         throw new RuntimeException("Видео не найдено");
       }
-      Video video = found.getItems().iterator().next();
-      if (found.getItems() == null || found.getItems().isEmpty()) {
+      Video video = found.items().iterator().next();
+      if (found.items() == null || found.items().isEmpty()) {
         throw new RuntimeException("Видео не найдено");
       }
       allVideos.add(video);

@@ -9,11 +9,14 @@ import io.micronaut.http.HttpResponse;
 import io.micronaut.http.annotation.Body;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Post;
+import io.micronaut.security.annotation.Secured;
+import io.micronaut.security.rules.SecurityRule;
 import io.micronaut.serde.annotation.Serdeable;
-import io.micronaut.transaction.annotation.Transactional;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 @Controller
@@ -34,6 +37,7 @@ public class LinkPayment {
   }
 
   @Transactional
+  @Secured(SecurityRule.IS_ANONYMOUS)
   @Post("/commands/media/linkPayment")
   public CompletableFuture<HttpResponse<LinkPaymentResponse>> linkPayment(
     @Body LinkPaymentCommand command
@@ -46,10 +50,12 @@ public class LinkPayment {
         .flatMap(id -> videoRepository.findPreparedVideo(id).stream())
         .toList();
       found.forEach(video -> video.linkPayment(command.paymentId()));
-      Integer songCost = settingsRepository
-        .getByRecipientId(command.recipientId())
-        .getData()
-        .songRequestCost();
+      Integer songCost = Optional.ofNullable(
+        settingsRepository
+          .getByRecipientId(command.recipientId())
+          .getData()
+          .songRequestCost()
+      ).orElse(100);
       return HttpResponse.ok(
         new LinkPaymentResponse(new Amount(songCost * found.size(), 0, "RUB"))
       );

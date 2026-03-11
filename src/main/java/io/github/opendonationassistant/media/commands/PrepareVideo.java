@@ -4,6 +4,7 @@ import com.fasterxml.uuid.Generators;
 import io.github.opendonationassistant.commons.logging.ODALogger;
 import io.github.opendonationassistant.integration.vk.VKApi;
 import io.github.opendonationassistant.integration.youtube.ContentDetails;
+import io.github.opendonationassistant.integration.youtube.Statistics;
 import io.github.opendonationassistant.integration.youtube.Video;
 import io.github.opendonationassistant.integration.youtube.Videos;
 import io.github.opendonationassistant.integration.youtube.YouTube;
@@ -172,20 +173,22 @@ public class PrepareVideo {
         "videoId",
         videoId,
         "amount",
-        Optional.ofNullable(found.getItems()).map(it -> it.size()).orElse(0)
+        Optional.ofNullable(found.items()).map(it -> it.size()).orElse(0)
       )
     );
-    if (found.getItems() == null || found.getItems().isEmpty()) {
+    if (found.items() == null || found.items().isEmpty()) {
       throw Problem.builder()
         .withTitle("Incorrect media")
         .withStatus(new HttpStatusType(HttpStatus.BAD_REQUEST))
         .withDetail("Видео не найдено")
         .build();
     }
-    Video video = found.getItems().iterator().next();
+    Video video = found.items().iterator().next();
 
-    String viewStats = video.getStatistics().getViewCount();
-    var viewCount = Integer.parseInt(viewStats);
+    var viewCount = Optional.ofNullable(video.statistics())
+      .map(Statistics::viewCount)
+      .map(Integer::parseInt)
+      .orElse(0);
     if (viewCount < settings.minViewAmount()) {
       throw Problem.builder()
         .withTitle("Incorrect media")
@@ -194,8 +197,8 @@ public class PrepareVideo {
         .build();
     }
     if (
-      Optional.ofNullable(video.getSnippet())
-        .map(it -> it.getTitle())
+      Optional.ofNullable(video.snippet())
+        .map(it -> it.title())
         .filter(title -> settings.passWordsBlacklist(title))
         .isEmpty()
     ) {
@@ -206,8 +209,8 @@ public class PrepareVideo {
         .build();
     }
     if (
-      Optional.ofNullable(video.getContentDetails())
-        .map(ContentDetails::getContentRating)
+      Optional.ofNullable(video.contentDetails())
+        .map(ContentDetails::contentRating)
         .map(it -> it.get("ytRating"))
         .map(it -> "ytAgeRestricted".equals(it))
         .orElse(false)
@@ -218,14 +221,25 @@ public class PrepareVideo {
         .withDetail("Видео не должно быть 18+")
         .build();
     }
+    final var snippet = video.snippet();
+    if (snippet == null) {
+      throw Problem.builder()
+        .withTitle("Incorrect media")
+        .withStatus(new HttpStatusType(HttpStatus.BAD_REQUEST))
+        .withDetail("Некорректная ссылка")
+        .build();
+    }
     return CompletableFuture.completedFuture(
       new VideoData(
         id,
         videoId,
         "youtube",
         "https://www.youtube.com/watch?v=%s".formatted(videoId),
-        video.getSnippet().getTitle(),
-        video.getSnippet().getThumbnails().get("default").getUrl(),
+        Optional.ofNullable(snippet.title()).orElse(""),
+        Optional.ofNullable(snippet.thumbnails())
+          .map(it -> it.get("default"))
+          .map(it -> it.url())
+          .orElse(""),
         "prepared",
         null,
         null,

@@ -2,18 +2,9 @@ package io.github.opendonationassistant.integration.youtube;
 
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
+
 import io.micronaut.serde.annotation.Serdeable;
 
 @Serdeable
-public class Videos {
-
-  List<Video> items;
-
-  public java.util.List<Video> getItems() {
-    return items;
-  }
-
-  public void setItems(java.util.List<Video> items) {
-    this.items = items;
-  }
-}
+public record Videos(@Nullable List<Video> items) {}

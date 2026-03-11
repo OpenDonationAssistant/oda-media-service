@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import io.github.opendonationassistant.integration.youtube.ContentDetails;
 import io.github.opendonationassistant.integration.youtube.Snippet;
 import io.github.opendonationassistant.integration.youtube.Thumbnail;
@@ -15,8 +16,6 @@ import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import jakarta.inject.Inject;
 import java.util.HashMap;
 import org.junit.jupiter.api.Test;
-
-import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 
 @MicronautTest(environments = "allinone")
 @Property(name = "youtube.key", value = "test")
@@ -35,24 +34,24 @@ public class YouTubeTest {
     YouTubeStubs.successListResponse();
     Videos found = youtube.list("z4FWUtsni7g");
     assertNotNull(found);
-    assertNotNull(found.getItems());
-    assertTrue(found.getItems().size() == 1);
-    Video video = found.getItems().get(0);
-    Snippet snippet = video.getSnippet();
+    assertNotNull(found.items());
+    assertTrue(found.items().size() == 1);
+    Video video = found.items().get(0);
+    Snippet snippet = video.snippet();
     assertNotNull(snippet);
     assertEquals(
       "Beautiful Medieval Fantasy Tavern, Medieval Inn | Fantasy Music and Ambience Cozy",
-      snippet.getTitle()
+      snippet.title()
     );
-    HashMap<String, Thumbnail> thumbnails = video.getSnippet().getThumbnails();
+    HashMap<String, Thumbnail> thumbnails = video.snippet().thumbnails();
     assertNotNull(thumbnails);
     Thumbnail defaultThumb = thumbnails.get("default");
     assertNotNull(defaultThumb);
     assertEquals(
       "https://i.ytimg.com/vi/z4FWUtsni7g/default.jpg",
-      defaultThumb.getUrl()
+      defaultThumb.url()
     );
-    ContentDetails contentDetails = video.getContentDetails();
+    ContentDetails contentDetails = video.contentDetails();
     assertNotNull(contentDetails);
   }
 }

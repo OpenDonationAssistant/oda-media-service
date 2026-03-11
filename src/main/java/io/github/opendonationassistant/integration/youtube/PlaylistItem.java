@@ -1,44 +1,13 @@
 package io.github.opendonationassistant.integration.youtube;
 
+import org.jspecify.annotations.Nullable;
+
 import io.micronaut.serde.annotation.Serdeable;
 
 @Serdeable
-public class PlaylistItem {
-
-  private String kind;
-  private String etag;
-  private String id;
-  private Snippet snippet;
-
-  public String getKind() {
-    return kind;
-  }
-
-  public void setKind(String kind) {
-    this.kind = kind;
-  }
-
-  public String getEtag() {
-    return etag;
-  }
-
-  public void setEtag(String etag) {
-    this.etag = etag;
-  }
-
-  public String getId() {
-    return id;
-  }
-
-  public void setId(String id) {
-    this.id = id;
-  }
-
-  public Snippet getSnippet() {
-    return snippet;
-  }
-
-  public void setSnippet(Snippet snippet) {
-    this.snippet = snippet;
-  }
-}
+public record PlaylistItem(
+  @Nullable String kind,
+  @Nullable String etag,
+  @Nullable String id,
+  @Nullable Snippet snippet
+) {}

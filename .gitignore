@@ -15,3 +15,4 @@ out/
 .factorypath
 .metadata/
 prepared-video-storage
+.mvn/wrapper

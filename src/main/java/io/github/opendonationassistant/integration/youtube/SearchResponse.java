@@ -1,26 +1,9 @@
 package io.github.opendonationassistant.integration.youtube;
 
 import io.micronaut.serde.annotation.Serdeable;
+import java.util.List;
+
+import org.jspecify.annotations.Nullable;
 
 @Serdeable
-public class SearchResponse {
-
-  public String kind;
-  public java.util.List<SearchResult> items;
-
-  public String getKind() {
-    return kind;
-  }
-
-  public void setKind(String kind) {
-    this.kind = kind;
-  }
-
-  public java.util.List<SearchResult> getItems() {
-    return items;
-  }
-
-  public void setItems(java.util.List<SearchResult> items) {
-    this.items = items;
-  }
-}
+public record SearchResponse(@Nullable String kind, @Nullable List<SearchResult> items) {}

@@ -14,5 +14,6 @@ public interface VideoDataRepository extends CrudRepository<VideoData, String> {
     String recipientId,
     String status
   );
-  CompletableFuture<List<VideoData>> findByPaymentId(String paymentId);
+
+  List<VideoData> findByPaymentId(String paymentId);
 }

@@ -1,42 +1,75 @@
 # ODA Media Service
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/OpenDonationAssistant/oda-media-service)
 
-## Micronaut 4.1.0 Documentation
+## Running with Docker
 
-- [User Guide](https://docs.micronaut.io/4.1.0/guide/index.html)
-- [API Reference](https://docs.micronaut.io/4.1.0/api/index.html)
-- [Configuration Reference](https://docs.micronaut.io/4.1.0/guide/configurationreference.html)
-- [Micronaut Guides](https://guides.micronaut.io/index.html)
----
+### Using GitHub Container Registry
 
-- [Micronaut Maven Plugin documentation](https://micronaut-projects.github.io/micronaut-maven-plugin/latest/)
-## Feature security-oauth2 documentation
+```bash
+docker run -d \
+  --name oda-media-service \
+  -p 8080:8080 \
+  -e JDBC_URL=jdbc:postgresql://postgres:5432/oda \
+  -e JDBC_USER=postgres \
+  -e JDBC_PASSWORD=your_password \
+  -e RABBITMQ_HOST=rabbitmq \
+  -e YOUTUBE_KEY=your_youtube_api_key \
+  ghcr.io/opendonationassistant/media-service:latest
+```
 
-- [Micronaut Security OAuth 2.0 documentation](https://micronaut-projects.github.io/micronaut-security/latest/guide/index.html#oauth)
+### Required Environment Variables
 
+| Variable | Description |
+|----------|-------------|
+| `JDBC_URL` | PostgreSQL JDBC URL (e.g., `jdbc:postgresql://postgres:5432/oda`) |
+| `JDBC_USER` | PostgreSQL username |
+| `JDBC_PASSWORD` | PostgreSQL password |
+| `RABBITMQ_HOST` | RabbitMQ host address |
+| `YOUTUBE_KEY` | YouTube Data API key |
 
-## Feature maven-enforcer-plugin documentation
+### Optional Environment Variables
 
-- [https://maven.apache.org/enforcer/maven-enforcer-plugin/](https://maven.apache.org/enforcer/maven-enforcer-plugin/)
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `MICRONAUT_SECURITY_TOKEN_JWT_SIGNATURES_JWKS_KEYCLOAK_URL` | `https://auth.oda.digital/realms/ODA/protocol/openid-connect/certs` | Keycloak JWKS URL for JWT validation |
 
+### Docker Compose Example
 
-## Feature security-jwt documentation
+```yaml
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: oda
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: your_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
-- [Micronaut Security JWT documentation](https://micronaut-projects.github.io/micronaut-security/latest/guide/index.html)
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "15672:15672"
 
+  oda-media-service:
+    image: ghcr.io/opendonationassistant/media-service:latest
+    depends_on:
+      - postgres
+      - rabbitmq
+    environment:
+      JDBC_URL: jdbc:postgresql://postgres:5432/oda
+      JDBC_USER: postgres
+      JDBC_PASSWORD: your_password
+      RABBITMQ_HOST: rabbitmq
+      YOUTUBE_KEY: your_youtube_api_key
+    ports:
+      - "8080:8080"
 
-## Feature micronaut-aot documentation
+volumes:
+  postgres_data:
+```
 
-- [Micronaut AOT documentation](https://micronaut-projects.github.io/micronaut-aot/latest/guide/)
-
-
-## Feature serialization-jackson documentation
-
-- [Micronaut Serialization Jackson Core documentation](https://micronaut-projects.github.io/micronaut-serialization/latest/guide/)
-
-
-## Feature http-client documentation
-
-- [Micronaut HTTP Client documentation](https://docs.micronaut.io/latest/guide/index.html#nettyHttpClient)
-
-
+Run with:
+```bash
+docker compose up -d
+```

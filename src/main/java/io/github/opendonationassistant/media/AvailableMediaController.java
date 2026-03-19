@@ -15,6 +15,12 @@ import io.micronaut.scheduling.TaskExecutors;
 import io.micronaut.scheduling.annotation.ExecuteOn;
 import io.micronaut.security.annotation.Secured;
 import io.micronaut.security.rules.SecurityRule;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -23,6 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Controller("/media/available")
+@Tag(name = "Available Media", description = "Search and retrieve available media from external providers")
 public class AvailableMediaController {
 
   private Logger log = LoggerFactory.getLogger(AvailableMediaController.class);
@@ -34,12 +41,15 @@ public class AvailableMediaController {
   }
 
   @Get
+  @Operation(summary = "Get available media", description = "Retrieves available videos from YouTube based on query, playlist ID, or video ID. At least one of query, playlistId, or videoId must be provided.")
+  @ApiResponse(responseCode = "200", description = "List of available videos", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Video.class)))
+  @ApiResponse(responseCode = "500", description = "Internal server error or video not found")
   @Secured(SecurityRule.IS_ANONYMOUS)
   @ExecuteOn(TaskExecutors.BLOCKING)
   public HttpResponse<java.util.List<Video>> available(
-    @Nullable @QueryValue("query") String query,
-    @Nullable @QueryValue("playlistId") String playlistId,
-    @Nullable @QueryValue("videoId") String videoId
+    @Parameter(description = "Search query for YouTube videos") @Nullable @QueryValue("query") String query,
+    @Parameter(description = "YouTube playlist ID to retrieve videos from") @Nullable @QueryValue("playlistId") String playlistId,
+    @Parameter(description = "Specific YouTube video ID") @Nullable @QueryValue("videoId") String videoId
   ) {
     List<Video> allVideos = new ArrayList<>();
     if (Objects.nonNull(query)) {

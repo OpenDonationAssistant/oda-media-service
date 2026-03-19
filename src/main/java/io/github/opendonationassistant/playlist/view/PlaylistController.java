@@ -18,6 +18,12 @@ import io.micronaut.http.annotation.PathVariable;
 import io.micronaut.security.annotation.Secured;
 import io.micronaut.security.authentication.Authentication;
 import io.micronaut.security.rules.SecurityRule;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.inject.Inject;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Controller
+@Tag(name = "Playlist", description = "Playlist management operations")
 public class PlaylistController extends BaseController {
 
   private ODALogger log = new ODALogger(this);
@@ -46,10 +53,13 @@ public class PlaylistController extends BaseController {
   }
 
   @Get("/playlists")
+  @Operation(summary = "List playlists", description = "Returns a paginated list of playlists for the authenticated user")
+  @ApiResponse(responseCode = "200", description = "Page of playlists", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Page.class)))
+  @ApiResponse(responseCode = "401", description = "Unauthorized - authentication required")
   @Secured(SecurityRule.IS_AUTHENTICATED)
   public HttpResponse<Page<PlaylistDto>> playlists(
     Authentication auth,
-    Pageable pageable
+    @Parameter(description = "Pagination parameters") Pageable pageable
   ) {
     var ownerId = getOwnerId(auth);
     if (ownerId.isEmpty()) {
@@ -63,10 +73,14 @@ public class PlaylistController extends BaseController {
   }
 
   @Get("/playlists/{playlistId}")
+  @Operation(summary = "Get playlist by ID", description = "Returns a specific playlist by its ID for the authenticated user")
+  @ApiResponse(responseCode = "200", description = "Playlist details", content = @Content(mediaType = "application/json", schema = @Schema(implementation = PlaylistDto.class)))
+  @ApiResponse(responseCode = "401", description = "Unauthorized - authentication required")
+  @ApiResponse(responseCode = "404", description = "Playlist not found")
   @Secured(SecurityRule.IS_AUTHENTICATED)
   public HttpResponse<PlaylistDto> playlist(
     Authentication auth,
-    @PathVariable String playlistId
+    @Parameter(description = "Playlist ID", required = true) @PathVariable String playlistId
   ) {
     var ownerId = getOwnerId(auth);
     if (ownerId.isEmpty()) {
@@ -80,8 +94,12 @@ public class PlaylistController extends BaseController {
   }
 
   @Get("/media/playlists/{playlistId}")
+  @Operation(summary = "Get playlist videos", description = "Retrieves videos from a YouTube playlist with shuffled order")
+  @ApiResponse(responseCode = "200", description = "Playlist with videos", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Playlist.class)))
   @Secured(SecurityRule.IS_ANONYMOUS)
-  public HttpResponse<Playlist> get(@PathVariable String playlistId) {
+  public HttpResponse<Playlist> get(
+    @Parameter(description = "YouTube playlist ID", required = true) @PathVariable String playlistId
+  ) {
     log.debug("Getting items from playlist", Map.of("playlistId", playlistId));
     PlaylistItemList page = youTube.playlistItems(playlistId, "");
     List<PlaylistItem> videos = Optional.ofNullable(page.items()).orElse(

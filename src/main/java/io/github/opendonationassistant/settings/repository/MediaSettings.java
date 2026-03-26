@@ -74,7 +74,7 @@ public class MediaSettings {
         .orElse(true),
       get(config, "vkvideoEnabled")
         .map(property -> (Boolean) property.value())
-        .orElse(false),
+        .orElse(true),
       tooltip,
       Arrays.asList(
         get(config, "wordsBlacklist")

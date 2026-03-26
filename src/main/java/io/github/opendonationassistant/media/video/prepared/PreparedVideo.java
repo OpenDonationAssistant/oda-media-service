@@ -68,10 +68,11 @@ public class PreparedVideo {
           "Send notification to recipient",
           Map.of("recipient", recipient, "video", video.data())
         );
-        return notificationSender.send(
-          "%smedia".formatted(recipient),
-          video.data()
-        );
+        return notificationSender
+          .send("/topic/%smedia".formatted(recipient), video.data())
+          .thenAccept(ignore ->
+            log.info("Notification sent", Map.of("recipient", recipient))
+          );
       })
       .join();
     return video;

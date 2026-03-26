@@ -56,6 +56,7 @@ public class PreparedVideo {
         new MediaHistoryEvent(
           "payment",
           paymentId,
+          recipient,
           video.data().id(),
           video.data().url(),
           video.data().title(),

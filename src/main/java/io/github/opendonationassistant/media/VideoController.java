@@ -39,22 +39,41 @@ public class VideoController extends BaseController {
   }
 
   @Patch("{id}")
-  @Operation(summary = "Mark video as handled", description = "Marks a video as handled by its ID")
+  @Operation(
+    summary = "Mark video as handled",
+    description = "Marks a video as handled by its ID"
+  )
   @ApiResponse(responseCode = "204", description = "Video marked as handled")
   @Secured(SecurityRule.IS_ANONYMOUS)
   public void update(
-    @Parameter(description = "Video ID to mark as handled", required = true) @PathVariable String id
+    @Parameter(
+      description = "Video ID to mark as handled",
+      required = true
+    ) @PathVariable String id
   ) {
     log.info("Try to make {} handled", id);
     repository.findReadyVideo(id).ifPresent(ReadyVideo::makeHandled);
   }
 
   @Get("{ids}")
-  @Operation(summary = "Get videos by IDs", description = "Retrieves video data for a comma-separated list of video IDs")
-  @ApiResponse(responseCode = "200", description = "List of videos retrieved successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = VideoData.class)))
+  @Operation(
+    summary = "Get videos by IDs",
+    description = "Retrieves video data for a comma-separated list of video IDs"
+  )
+  @ApiResponse(
+    responseCode = "200",
+    description = "List of videos retrieved successfully",
+    content = @Content(
+      mediaType = "application/json",
+      schema = @Schema(implementation = VideoData.class)
+    )
+  )
   @Secured(SecurityRule.IS_ANONYMOUS)
   public List<VideoData> get(
-    @Parameter(description = "Comma-separated video IDs", required = true) @PathVariable String ids
+    @Parameter(
+      description = "Comma-separated video IDs",
+      required = true
+    ) @PathVariable String ids
   ) {
     return Arrays.asList(ids.split(","))
       .stream()
@@ -64,9 +83,22 @@ public class VideoController extends BaseController {
   }
 
   @Get
-  @Operation(summary = "List authenticated user's videos", description = "Returns a list of ready videos for the authenticated recipient")
-  @ApiResponse(responseCode = "200", description = "List of user's videos", content = @Content(mediaType = "application/json", schema = @Schema(implementation = VideoData.class)))
-  @ApiResponse(responseCode = "401", description = "Unauthorized - authentication required")
+  @Operation(
+    summary = "List authenticated user's videos",
+    description = "Returns a list of ready videos for the authenticated recipient"
+  )
+  @ApiResponse(
+    responseCode = "200",
+    description = "List of user's videos",
+    content = @Content(
+      mediaType = "application/json",
+      schema = @Schema(implementation = VideoData.class)
+    )
+  )
+  @ApiResponse(
+    responseCode = "401",
+    description = "Unauthorized - authentication required"
+  )
   @Secured(SecurityRule.IS_AUTHENTICATED)
   public CompletableFuture<HttpResponse<List<VideoData>>> list(
     Authentication auth

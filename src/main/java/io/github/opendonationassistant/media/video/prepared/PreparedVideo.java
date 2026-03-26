@@ -63,9 +63,16 @@ public class PreparedVideo {
           video.data().thumbnail()
         )
       )
-      .thenCompose(it ->
-        notificationSender.send("%smedia".formatted(recipient), video.data())
-      )
+      .thenComposeAsync(it -> {
+        log.info(
+          "Send notification to recipient",
+          Map.of("recipient", recipient, "video", video.data())
+        );
+        return notificationSender.send(
+          "%smedia".formatted(recipient),
+          video.data()
+        );
+      })
       .join();
     return video;
   }

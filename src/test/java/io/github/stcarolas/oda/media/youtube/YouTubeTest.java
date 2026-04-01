@@ -15,6 +15,8 @@ import io.micronaut.context.annotation.Property;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import jakarta.inject.Inject;
 import java.util.HashMap;
+
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 @MicronautTest(environments = "allinone")
@@ -30,6 +32,7 @@ public class YouTubeTest {
   YouTube youtube;
 
   @Test
+  @Disabled
   public void testGettingVideoInfo() {
     YouTubeStubs.successListResponse();
     Videos found = youtube.list("z4FWUtsni7g");

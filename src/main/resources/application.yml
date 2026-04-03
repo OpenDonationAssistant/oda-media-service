@@ -8,7 +8,7 @@ micronaut:
         signatures:
           jwks:
             keycloak:
-              url: https://auth.oda.digital/realms/ODA/protocol/openid-connect/certs
+              url: ${JWKS_URI}
   http.services.youtube.url: https://youtube.googleapis.com
 flyway:
   datasources:

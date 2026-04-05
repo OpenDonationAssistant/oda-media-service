@@ -35,7 +35,7 @@ public class YouTubeTest {
   @Disabled
   public void testGettingVideoInfo() {
     YouTubeStubs.successListResponse();
-    Videos found = youtube.list("z4FWUtsni7g");
+    Videos found = youtube.list("z4FWUtsni7g").join();
     assertNotNull(found);
     assertNotNull(found.items());
     assertTrue(found.items().size() == 1);

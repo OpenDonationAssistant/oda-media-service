@@ -2,6 +2,8 @@ package io.github.opendonationassistant.integration.youtube;
 
 import static io.micronaut.http.HttpHeaders.CONTENT_TYPE;
 
+import java.util.concurrent.CompletableFuture;
+
 import io.micronaut.http.annotation.Get;
 import io.micronaut.http.annotation.Header;
 import io.micronaut.http.annotation.QueryValue;
@@ -12,7 +14,7 @@ import io.micronaut.http.client.annotation.Client;
 public interface YouTubeLowLevelApi {
 
   @Get("/youtube/v3/videos?part=contentDetails&part=snippet&part=statistics")
-  Videos list(@QueryValue("id") String id, @QueryValue("key") String key);
+  CompletableFuture<Videos> list(@QueryValue("id") String id, @QueryValue("key") String key);
 
   @Get("/youtube/v3/search?part=snippet&type=video")
   SearchResponse search(

@@ -1,5 +1,7 @@
 package io.github.opendonationassistant.integration.youtube;
 
+import java.util.concurrent.CompletableFuture;
+
 import io.micronaut.context.annotation.Value;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -19,7 +21,7 @@ public class YouTube {
     this.api = api;
   }
 
-  public Videos list(String id) {
+  public CompletableFuture<Videos> list(String id) {
     return api.list(id, key);
   }
 

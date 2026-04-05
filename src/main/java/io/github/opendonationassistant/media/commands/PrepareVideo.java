@@ -166,87 +166,87 @@ public class PrepareVideo {
     }
     String videoId = matcher.group(6);
 
-    Videos found = youTube.list(videoId);
-    log.debug(
-      "YouTube video search result",
-      Map.of(
-        "videoId",
-        videoId,
-        "amount",
-        Optional.ofNullable(found.items()).map(it -> it.size()).orElse(0)
-      )
-    );
-    if (found.items() == null || found.items().isEmpty()) {
-      throw Problem.builder()
-        .withTitle("Incorrect media")
-        .withStatus(new HttpStatusType(HttpStatus.BAD_REQUEST))
-        .withDetail("Видео не найдено")
-        .build();
-    }
-    Video video = found.items().iterator().next();
-
-    var viewCount = Optional.ofNullable(video.statistics())
-      .map(Statistics::viewCount)
-      .map(Integer::parseInt)
-      .orElse(0);
-    if (viewCount < settings.minViewAmount()) {
-      throw Problem.builder()
-        .withTitle("Incorrect media")
-        .withStatus(new HttpStatusType(HttpStatus.BAD_REQUEST))
-        .withDetail("Слишком мало просмотров у видео")
-        .build();
-    }
-    if (
-      Optional.ofNullable(video.snippet())
-        .map(it -> it.title())
-        .filter(title -> settings.passWordsBlacklist(title))
-        .isEmpty()
-    ) {
-      throw Problem.builder()
-        .withTitle("Incorrect media")
-        .withStatus(new HttpStatusType(HttpStatus.BAD_REQUEST))
-        .withDetail("Видео содержит слова из черного списка")
-        .build();
-    }
-    if (
-      Optional.ofNullable(video.contentDetails())
-        .map(ContentDetails::contentRating)
-        .map(it -> it.get("ytRating"))
-        .map(it -> "ytAgeRestricted".equals(it))
-        .orElse(false)
-    ) {
-      throw Problem.builder()
-        .withTitle("Incorrect media")
-        .withStatus(new HttpStatusType(HttpStatus.BAD_REQUEST))
-        .withDetail("Видео не должно быть 18+")
-        .build();
-    }
-    final var snippet = video.snippet();
-    if (snippet == null) {
-      throw Problem.builder()
-        .withTitle("Incorrect media")
-        .withStatus(new HttpStatusType(HttpStatus.BAD_REQUEST))
-        .withDetail("Некорректная ссылка")
-        .build();
-    }
-    return CompletableFuture.completedFuture(
-      new VideoData(
-        id,
-        videoId,
-        "youtube",
-        "https://www.youtube.com/watch?v=%s".formatted(videoId),
-        Optional.ofNullable(snippet.title()).orElse(""),
-        Optional.ofNullable(snippet.thumbnails())
-          .map(it -> it.get("default"))
-          .map(it -> it.url())
-          .orElse(""),
-        "prepared",
-        null,
-        null,
-        null,
-        null
-      )
-    );
+    return youTube
+      .list(videoId)
+      .thenApply(found -> {
+        log.debug(
+          "YouTube video search result",
+          Map.of(
+            "videoId",
+            videoId,
+            "amount",
+            Optional.ofNullable(found.items()).map(it -> it.size()).orElse(0)
+          )
+        );
+        if (found.items() == null || found.items().isEmpty()) {
+          throw Problem.builder()
+            .withTitle("Incorrect media")
+            .withStatus(new HttpStatusType(HttpStatus.BAD_REQUEST))
+            .withDetail("Видео не найдено")
+            .build();
+        }
+        Video video = found.items().iterator().next();
+        var viewCount = Optional.ofNullable(video.statistics())
+          .map(Statistics::viewCount)
+          .map(Integer::parseInt)
+          .orElse(0);
+        if (viewCount < settings.minViewAmount()) {
+          throw Problem.builder()
+            .withTitle("Incorrect media")
+            .withStatus(new HttpStatusType(HttpStatus.BAD_REQUEST))
+            .withDetail("Слишком мало просмотров у видео")
+            .build();
+        }
+        if (
+          Optional.ofNullable(video.snippet())
+            .map(it -> it.title())
+            .filter(title -> settings.passWordsBlacklist(title))
+            .isEmpty()
+        ) {
+          throw Problem.builder()
+            .withTitle("Incorrect media")
+            .withStatus(new HttpStatusType(HttpStatus.BAD_REQUEST))
+            .withDetail("Видео содержит слова из черного списка")
+            .build();
+        }
+        if (
+          Optional.ofNullable(video.contentDetails())
+            .map(ContentDetails::contentRating)
+            .map(it -> it.get("ytRating"))
+            .map(it -> "ytAgeRestricted".equals(it))
+            .orElse(false)
+        ) {
+          throw Problem.builder()
+            .withTitle("Incorrect media")
+            .withStatus(new HttpStatusType(HttpStatus.BAD_REQUEST))
+            .withDetail("Видео не должно быть 18+")
+            .build();
+        }
+        final var snippet = video.snippet();
+        if (snippet == null) {
+          throw Problem.builder()
+            .withTitle("Incorrect media")
+            .withStatus(new HttpStatusType(HttpStatus.BAD_REQUEST))
+            .withDetail("Некорректная ссылка")
+            .build();
+        }
+        return new VideoData(
+          id,
+          videoId,
+          "youtube",
+          "https://www.youtube.com/watch?v=%s".formatted(videoId),
+          Optional.ofNullable(snippet.title()).orElse(""),
+          Optional.ofNullable(snippet.thumbnails())
+            .map(it -> it.get("default"))
+            .map(it -> it.url())
+            .orElse(""),
+          "prepared",
+          null,
+          null,
+          null,
+          null
+        );
+      });
   }
 
   @Serdeable

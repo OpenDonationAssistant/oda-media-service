@@ -109,7 +109,7 @@ public class AvailableMediaController {
       );
     }
     if (Objects.nonNull(videoId)) {
-      Videos found = youTube.list(videoId);
+      Videos found = youTube.list(videoId).join();
       if (found.items() == null || found.items().isEmpty()) {
         throw new RuntimeException("Видео не найдено");
       }

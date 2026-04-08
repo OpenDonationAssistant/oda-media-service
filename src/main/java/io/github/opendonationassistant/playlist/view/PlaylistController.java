@@ -15,6 +15,8 @@ import io.micronaut.http.HttpResponse;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Get;
 import io.micronaut.http.annotation.PathVariable;
+import io.micronaut.scheduling.TaskExecutors;
+import io.micronaut.scheduling.annotation.ExecuteOn;
 import io.micronaut.security.annotation.Secured;
 import io.micronaut.security.authentication.Authentication;
 import io.micronaut.security.rules.SecurityRule;
@@ -53,9 +55,22 @@ public class PlaylistController extends BaseController {
   }
 
   @Get("/playlists")
-  @Operation(summary = "List playlists", description = "Returns a paginated list of playlists for the authenticated user")
-  @ApiResponse(responseCode = "200", description = "Page of playlists", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Page.class)))
-  @ApiResponse(responseCode = "401", description = "Unauthorized - authentication required")
+  @Operation(
+    summary = "List playlists",
+    description = "Returns a paginated list of playlists for the authenticated user"
+  )
+  @ApiResponse(
+    responseCode = "200",
+    description = "Page of playlists",
+    content = @Content(
+      mediaType = "application/json",
+      schema = @Schema(implementation = Page.class)
+    )
+  )
+  @ApiResponse(
+    responseCode = "401",
+    description = "Unauthorized - authentication required"
+  )
   @Secured(SecurityRule.IS_AUTHENTICATED)
   public HttpResponse<Page<PlaylistDto>> playlists(
     Authentication auth,
@@ -73,14 +88,30 @@ public class PlaylistController extends BaseController {
   }
 
   @Get("/playlists/{playlistId}")
-  @Operation(summary = "Get playlist by ID", description = "Returns a specific playlist by its ID for the authenticated user")
-  @ApiResponse(responseCode = "200", description = "Playlist details", content = @Content(mediaType = "application/json", schema = @Schema(implementation = PlaylistDto.class)))
-  @ApiResponse(responseCode = "401", description = "Unauthorized - authentication required")
+  @Operation(
+    summary = "Get playlist by ID",
+    description = "Returns a specific playlist by its ID for the authenticated user"
+  )
+  @ApiResponse(
+    responseCode = "200",
+    description = "Playlist details",
+    content = @Content(
+      mediaType = "application/json",
+      schema = @Schema(implementation = PlaylistDto.class)
+    )
+  )
+  @ApiResponse(
+    responseCode = "401",
+    description = "Unauthorized - authentication required"
+  )
   @ApiResponse(responseCode = "404", description = "Playlist not found")
   @Secured(SecurityRule.IS_AUTHENTICATED)
   public HttpResponse<PlaylistDto> playlist(
     Authentication auth,
-    @Parameter(description = "Playlist ID", required = true) @PathVariable String playlistId
+    @Parameter(
+      description = "Playlist ID",
+      required = true
+    ) @PathVariable String playlistId
   ) {
     var ownerId = getOwnerId(auth);
     if (ownerId.isEmpty()) {
@@ -94,11 +125,25 @@ public class PlaylistController extends BaseController {
   }
 
   @Get("/media/playlists/{playlistId}")
-  @Operation(summary = "Get playlist videos", description = "Retrieves videos from a YouTube playlist with shuffled order")
-  @ApiResponse(responseCode = "200", description = "Playlist with videos", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Playlist.class)))
+  @Operation(
+    summary = "Get playlist videos",
+    description = "Retrieves videos from a YouTube playlist with shuffled order"
+  )
+  @ApiResponse(
+    responseCode = "200",
+    description = "Playlist with videos",
+    content = @Content(
+      mediaType = "application/json",
+      schema = @Schema(implementation = Playlist.class)
+    )
+  )
   @Secured(SecurityRule.IS_ANONYMOUS)
+  @ExecuteOn(TaskExecutors.BLOCKING)
   public HttpResponse<Playlist> get(
-    @Parameter(description = "YouTube playlist ID", required = true) @PathVariable String playlistId
+    @Parameter(
+      description = "YouTube playlist ID",
+      required = true
+    ) @PathVariable String playlistId
   ) {
     log.debug("Getting items from playlist", Map.of("playlistId", playlistId));
     PlaylistItemList page = youTube.playlistItems(playlistId, "");

@@ -14,6 +14,8 @@ flyway:
   datasources:
     default:
       enabled: true
+      schemas: 'media'
+      default-schema: 'media'
 jpa:
   default:
     entity-scan:

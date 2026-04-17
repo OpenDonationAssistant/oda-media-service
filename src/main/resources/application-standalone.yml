@@ -5,6 +5,8 @@ datasources:
     password: ${JDBC_PASSWORD}
     driverClassName: 'org.postgresql.Driver'
     db-type: "postgresql"
+    schema: media
+    maximumPoolSize: 2
 rabbitmq.host: ${RABBITMQ_HOST}
 logger:
   levels:

@@ -14,6 +14,8 @@ public record MediaSettingsData(
   @Id @MappedProperty("id") String id,
   @MappedProperty("recipient_id") String recipientId,
   @MappedProperty("song_request_cost") @Nullable Integer songRequestCost,
+  @MappedProperty("tarification") TARIFICATION tarification,
+  @MappedProperty("max_len") @Nullable Integer maxLen,
   @MappedProperty("max_amount") Integer maxAmount,
   @MappedProperty("request_view_amount") Integer requestViewAmount,
   @MappedProperty("requests_enabled") Boolean requestsEnabled,
@@ -25,4 +27,10 @@ public record MediaSettingsData(
     converter = StringListConverter.class
   )
   List<String> wordsBlacklist
-) {}
+) {
+  @Serdeable
+  public static enum TARIFICATION {
+    PER_LINK,
+    PER_MINUTE,
+  }
+}

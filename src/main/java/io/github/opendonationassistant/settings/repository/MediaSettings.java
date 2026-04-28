@@ -5,8 +5,10 @@ import io.github.opendonationassistant.events.config.ConfigCommand;
 import io.github.opendonationassistant.events.config.ConfigCommandSender;
 import io.github.opendonationassistant.events.widget.WidgetConfig;
 import io.github.opendonationassistant.events.widget.WidgetProperty;
+import io.github.opendonationassistant.settings.repository.MediaSettingsData.TARIFICATION;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,20 +52,38 @@ public class MediaSettings {
     var tooltip = get(config, "requestTooltip")
       .map(property -> (String) property.value())
       .orElse("");
-    var requestCost = get(config, "songRequestCost")
-      .map(property -> (Integer) property.value())
+    var tarification = get(config, "tarification").map(property ->
+      (Map<String, Object>) property.value()
+    );
+    var requestCost = tarification
+      .flatMap(value -> Optional.ofNullable((Integer) value.get("cost")))
       .orElse(100);
+    var tarificationMode = tarification
+      .flatMap(value -> Optional.ofNullable((String) value.get("method")))
+      .orElse("perLink");
+    Integer maxLen = get(config, "maxLen")
+      .map(property -> (Map<String, Object>) property.value())
+      .map(value -> {
+        if ((Boolean) value.getOrDefault("limitLen", false)) {
+          return (Integer) value.getOrDefault("limit", 60);
+        }
+        return null;
+      })
+      .orElse(null);
     var maxAmount = get(config, "songMaxAmount")
       .map(property -> (Integer) property.value())
       .orElse(12);
     var requestsEnabled = get(config, "requestsEnabled")
       .map(property -> (Boolean) property.value())
       .orElse(true);
-
     var updated = new MediaSettingsData(
       data.id(),
       data.recipientId(),
       requestCost,
+      "perLink".equals(tarificationMode)
+        ? TARIFICATION.PER_LINK
+        : TARIFICATION.PER_MINUTE,
+      maxLen,
       maxAmount,
       get(config, "requestViewAmount")
         .map(property -> (Integer) property.value())

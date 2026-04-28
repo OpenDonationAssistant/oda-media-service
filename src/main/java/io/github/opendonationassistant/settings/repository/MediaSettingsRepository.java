@@ -2,6 +2,7 @@ package io.github.opendonationassistant.settings.repository;
 
 import com.fasterxml.uuid.Generators;
 import io.github.opendonationassistant.events.config.ConfigCommandSender;
+import io.github.opendonationassistant.settings.repository.MediaSettingsData.TARIFICATION;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.util.List;
@@ -35,6 +36,8 @@ public class MediaSettingsRepository {
           Generators.timeBasedEpochGenerator().generate().toString(),
           recipientId,
           100,
+          TARIFICATION.PER_LINK,
+          null,
           12,
           100,
           true,

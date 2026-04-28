@@ -1,16 +1,17 @@
 package io.github.opendonationassistant.media.commands;
 
 import com.fasterxml.uuid.Generators;
+import io.github.opendonationassistant.commons.Amount;
 import io.github.opendonationassistant.commons.logging.ODALogger;
 import io.github.opendonationassistant.integration.vk.VKApi;
 import io.github.opendonationassistant.integration.youtube.ContentDetails;
 import io.github.opendonationassistant.integration.youtube.Statistics;
 import io.github.opendonationassistant.integration.youtube.Video;
-import io.github.opendonationassistant.integration.youtube.Videos;
 import io.github.opendonationassistant.integration.youtube.YouTube;
 import io.github.opendonationassistant.media.repository.VideoData;
 import io.github.opendonationassistant.media.repository.VideoDataRepository;
 import io.github.opendonationassistant.settings.repository.MediaSettings;
+import io.github.opendonationassistant.settings.repository.MediaSettingsData.TARIFICATION;
 import io.github.opendonationassistant.settings.repository.MediaSettingsRepository;
 import io.micronaut.core.util.StringUtils;
 import io.micronaut.http.HttpResponse;
@@ -23,6 +24,7 @@ import io.micronaut.security.annotation.Secured;
 import io.micronaut.security.rules.SecurityRule;
 import io.micronaut.serde.annotation.Serdeable;
 import jakarta.inject.Inject;
+import java.time.Duration;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -68,7 +70,7 @@ public class PrepareVideo {
 
   @Put("/media/video")
   @Secured(SecurityRule.IS_ANONYMOUS)
-  public CompletableFuture<HttpResponse<VideoData>> prepareVideo(
+  public CompletableFuture<HttpResponse<PrepareVideoResponse>> prepareVideo(
     @Body PrepareVideoCommand command
   ) {
     log.info("Preparing media", Map.of("url", command.url()));
@@ -79,10 +81,21 @@ public class PrepareVideo {
       command.url().contains("vkvideo.ru")
         ? prepareVk(settings, command.url())
         : prepareYoutube(settings, command.url())
-    ).thenApply(videoRepository::save).thenApply(HttpResponse::ok);
+    ).thenApply(HttpResponse::ok);
   }
 
-  private CompletableFuture<VideoData> prepareVk(
+  @Serdeable
+  public static record PrepareVideoResponse(
+    String id,
+    String originId,
+    String provider,
+    String url,
+    String title,
+    String thumbnail,
+    Amount cost
+  ) {}
+
+  private CompletableFuture<PrepareVideoResponse> prepareVk(
     MediaSettings settings,
     String url
   ) {
@@ -133,10 +146,28 @@ public class PrepareVideo {
           null,
           null
         );
+      })
+      .thenApply(videoRepository::save)
+      .thenApply(data -> {
+        return new PrepareVideoResponse(
+          data.id(),
+          data.originId(),
+          data.provider(),
+          data.url(),
+          data.title(),
+          data.thumbnail(),
+          new Amount(
+            Optional.ofNullable(settings.getData())
+              .map(it -> it.songRequestCost())
+              .orElse(100),
+            0,
+            "RUB"
+          )
+        );
       });
   }
 
-  private CompletableFuture<VideoData> prepareYoutube(
+  private CompletableFuture<PrepareVideoResponse> prepareYoutube(
     MediaSettings settings,
     String url
   ) {
@@ -186,6 +217,21 @@ public class PrepareVideo {
             .build();
         }
         Video video = found.items().iterator().next();
+        final Long duration = Optional.ofNullable(video.contentDetails())
+          .map(ContentDetails::duration)
+          .map(Duration::parse)
+          .map(Duration::toSeconds)
+          .orElse(0L);
+        if (
+          settings.getData().maxLen() != null &&
+          duration > settings.getData().maxLen()
+        ) {
+          throw Problem.builder()
+            .withTitle("Incorrect media")
+            .withStatus(new HttpStatusType(HttpStatus.BAD_REQUEST))
+            .withDetail("Слишком длинное видео")
+            .build();
+        }
         var viewCount = Optional.ofNullable(video.statistics())
           .map(Statistics::viewCount)
           .map(Integer::parseInt)
@@ -230,7 +276,41 @@ public class PrepareVideo {
             .withDetail("Некорректная ссылка")
             .build();
         }
-        return new VideoData(
+        videoRepository.save(
+          new VideoData(
+            id,
+            videoId,
+            "youtube",
+            "https://www.youtube.com/watch?v=%s".formatted(videoId),
+            Optional.ofNullable(snippet.title()).orElse(""),
+            Optional.ofNullable(snippet.thumbnails())
+              .map(it -> it.get("default"))
+              .map(it -> it.url())
+              .orElse(""),
+            "prepared",
+            null,
+            null,
+            null,
+            null
+          )
+        );
+        Amount cost = settings.getData().tarification() == TARIFICATION.PER_LINK
+          ? new Amount(
+            Optional.ofNullable(settings.getData())
+              .map(it -> it.songRequestCost())
+              .orElse(100),
+            0,
+            "RUB"
+          )
+          : new Amount(
+            (int) ((duration / 60) *
+              Optional.ofNullable(settings.getData())
+                .map(it -> it.songRequestCost())
+                .orElse(100)),
+            0,
+            "RUB"
+          );
+        return new PrepareVideoResponse(
           id,
           videoId,
           "youtube",
@@ -240,11 +320,7 @@ public class PrepareVideo {
             .map(it -> it.get("default"))
             .map(it -> it.url())
             .orElse(""),
-          "prepared",
-          null,
-          null,
-          null,
-          null
+          cost
         );
       });
   }

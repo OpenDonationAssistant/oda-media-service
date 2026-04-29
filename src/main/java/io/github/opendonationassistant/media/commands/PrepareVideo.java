@@ -303,10 +303,10 @@ public class PrepareVideo {
             "RUB"
           )
           : new Amount(
-            (int) ((duration / 60) *
+            (int) (duration *
               Optional.ofNullable(settings.getData())
                 .map(it -> it.songRequestCost())
-                .orElse(100)),
+                .orElse(100) / 60),
             0,
             "RUB"
           );

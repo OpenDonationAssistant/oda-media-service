@@ -135,7 +135,7 @@ public class VideoController extends BaseController {
         ) @QueryValue("recipientId") String recipientId
     ) {
         return repository
-            .findReadyVideosForRecipientId(recipientId)
-            .thenApply(videos -> HttpResponse.ok(videos.size()));
+            .countByRecipientIdAndStatusOrderByReadyTimestamp(recipientId, "ready")
+            .thenApply(count -> HttpResponse.ok(count));
     }
 }

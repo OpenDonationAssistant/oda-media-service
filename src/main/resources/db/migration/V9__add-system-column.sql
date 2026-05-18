@@ -1,0 +1,1 @@
+ALTER TABLE video ADD COLUMN system VARCHAR(63) default 'ODA' NOT NULL;

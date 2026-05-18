@@ -144,7 +144,8 @@ public class PrepareVideo {
           null,
           null,
           null,
-          null
+          null,
+          "ODA"
         );
       })
       .thenApply(videoRepository::save)
@@ -291,7 +292,8 @@ public class PrepareVideo {
             null,
             null,
             null,
-            null
+            null,
+            "ODA"
           )
         );
         Amount cost = settings.getData().tarification() == TARIFICATION.PER_LINK
@@ -303,10 +305,11 @@ public class PrepareVideo {
             "RUB"
           )
           : new Amount(
-            (int) (duration *
-              Optional.ofNullable(settings.getData())
-                .map(it -> it.songRequestCost())
-                .orElse(100) / 60),
+            (int) ((duration *
+                Optional.ofNullable(settings.getData())
+                  .map(it -> it.songRequestCost())
+                  .orElse(100)) /
+              60),
             0,
             "RUB"
           );

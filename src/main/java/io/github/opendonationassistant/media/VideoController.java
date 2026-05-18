@@ -82,35 +82,60 @@ public class VideoController extends BaseController {
       .toList();
   }
 
-  @Get
-  @Operation(
-    summary = "List authenticated user's videos",
-    description = "Returns a list of ready videos for the authenticated recipient"
-  )
-  @ApiResponse(
-    responseCode = "200",
-    description = "List of user's videos",
-    content = @Content(
-      mediaType = "application/json",
-      schema = @Schema(implementation = VideoData.class)
+    @Get
+    @Operation(
+        summary = "List authenticated user's videos",
+        description = "Returns a list of ready videos for the authenticated recipient"
     )
-  )
-  @ApiResponse(
-    responseCode = "401",
-    description = "Unauthorized - authentication required"
-  )
-  @Secured(SecurityRule.IS_AUTHENTICATED)
-  public CompletableFuture<HttpResponse<List<VideoData>>> list(
-    Authentication auth
-  ) {
-    var ownerId = getOwnerId(auth);
-    if (ownerId.isEmpty()) {
-      return CompletableFuture.completedFuture(HttpResponse.unauthorized());
+    @ApiResponse(
+        responseCode = "200",
+        description = "List of user's videos",
+        content = @Content(
+            mediaType = "application/json",
+            schema = @Schema(implementation = VideoData.class)
+        )
+    )
+    @ApiResponse(
+        responseCode = "401",
+        description = "Unauthorized - authentication required"
+    )
+    @Secured(SecurityRule.IS_AUTHENTICATED)
+    public CompletableFuture<HttpResponse<List<VideoData>>> list(
+        Authentication auth
+    ) {
+        var ownerId = getOwnerId(auth);
+        if (ownerId.isEmpty()) {
+            return CompletableFuture.completedFuture(HttpResponse.unauthorized());
+        }
+        return repository
+            .findReadyVideosForRecipientId(ownerId.get())
+            .thenApply(videos -> {
+                return HttpResponse.ok(videos.stream().map(ReadyVideo::data).toList());
+            });
     }
-    return repository
-      .findReadyVideosForRecipientId(ownerId.get())
-      .thenApply(videos -> {
-        return HttpResponse.ok(videos.stream().map(ReadyVideo::data).toList());
-      });
-  }
+
+    @Get("/count")
+    @Operation(
+        summary = "Count ready videos for recipient",
+        description = "Returns the number of ready videos for a given recipient ID"
+    )
+    @ApiResponse(
+        responseCode = "200",
+        description = "Count of ready videos",
+        content = @Content(
+            mediaType = "application/json",
+            schema = @Schema(implementation = Integer.class)
+        )
+    )
+    @Secured(SecurityRule.IS_ANONYMOUS)
+    public CompletableFuture<HttpResponse<Integer>> countReadyVideos(
+        @Parameter(
+            description = "Recipient ID to count ready videos for",
+            required = true
+        ) @QueryValue("recipientId") String recipientId
+    ) {
+        return repository
+            .findReadyVideosForRecipientId(recipientId)
+            .thenApply(videos -> HttpResponse.ok(videos.size()));
+    }
 }

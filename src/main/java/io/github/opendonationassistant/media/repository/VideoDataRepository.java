@@ -8,9 +8,12 @@ import java.util.concurrent.CompletableFuture;
 
 @JdbcRepository(dialect = Dialect.POSTGRES)
 public interface VideoDataRepository extends CrudRepository<VideoData, String> {
-  CompletableFuture<
-    List<VideoData>
-  > findByRecipientIdAndStatusOrderByReadyTimestamp(
+  CompletableFuture<List<VideoData>> findByRecipientIdAndStatusOrderByReadyTimestamp(
+    String recipientId,
+    String status
+  );
+
+  CompletableFuture<Integer> countByRecipientIdAndStatusOrderByReadyTimestamp(
     String recipientId,
     String status
   );

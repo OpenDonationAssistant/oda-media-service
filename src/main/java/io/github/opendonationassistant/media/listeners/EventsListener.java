@@ -12,6 +12,10 @@ import java.io.IOException;
 @RabbitListener
 public class EventsListener {
 
+  public static final String QUEUE_NAME = "media.events";
+  public static final io.github.opendonationassistant.rabbit.Queue QUEUE =
+    new io.github.opendonationassistant.rabbit.Queue(QUEUE_NAME);
+
   private final MessageProcessor processor;
 
   @Inject
@@ -19,7 +23,7 @@ public class EventsListener {
     this.processor = processor;
   }
 
-  @Queue("media.events")
+  @Queue(QUEUE_NAME)
   @Transactional
   public void listenMediaEvents(
     @MessageHeader("type") String type,

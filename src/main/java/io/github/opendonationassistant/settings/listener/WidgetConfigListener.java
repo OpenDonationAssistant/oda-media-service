@@ -11,6 +11,10 @@ import jakarta.inject.Inject;
 @RabbitListener
 public class WidgetConfigListener {
 
+  public static final String QUEUE_NAME = "config.media";
+  public static final io.github.opendonationassistant.rabbit.Queue QUEUE =
+    new io.github.opendonationassistant.rabbit.Queue(QUEUE_NAME);
+
   private MediaSettingsRepository repository;
 
   @Inject
@@ -18,7 +22,7 @@ public class WidgetConfigListener {
     this.repository = repository;
   }
 
-  @Queue(Configs.MEDIA)
+  @Queue(QUEUE_NAME)
   public void listen(WidgetChangedEvent changes) {
     final MediaSettings settings = repository.getByRecipientId(
       changes.widget().ownerId()

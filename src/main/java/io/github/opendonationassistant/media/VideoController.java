@@ -3,15 +3,20 @@ package io.github.opendonationassistant.media;
 import io.github.opendonationassistant.commons.micronaut.BaseController;
 import io.github.opendonationassistant.media.repository.VideoData;
 import io.github.opendonationassistant.media.repository.VideoRepository;
+import io.github.opendonationassistant.media.video.HandledVideo;
 import io.github.opendonationassistant.media.video.ready.ReadyVideo;
+import io.micronaut.data.model.Page;
+import io.micronaut.data.model.Pageable;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Get;
 import io.micronaut.http.annotation.Patch;
 import io.micronaut.http.annotation.PathVariable;
+import io.micronaut.http.annotation.QueryValue;
 import io.micronaut.security.annotation.Secured;
 import io.micronaut.security.authentication.Authentication;
 import io.micronaut.security.rules.SecurityRule;
+import io.micronaut.serde.annotation.Serdeable;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -82,60 +87,92 @@ public class VideoController extends BaseController {
       .toList();
   }
 
-    @Get
-    @Operation(
-        summary = "List authenticated user's videos",
-        description = "Returns a list of ready videos for the authenticated recipient"
+  @Get
+  @Operation(
+    summary = "List authenticated user's videos",
+    description = "Returns a list of ready videos for the authenticated recipient"
+  )
+  @ApiResponse(
+    responseCode = "200",
+    description = "List of user's videos",
+    content = @Content(
+      mediaType = "application/json",
+      schema = @Schema(implementation = VideoData.class)
     )
-    @ApiResponse(
-        responseCode = "200",
-        description = "List of user's videos",
-        content = @Content(
-            mediaType = "application/json",
-            schema = @Schema(implementation = VideoData.class)
-        )
-    )
-    @ApiResponse(
-        responseCode = "401",
-        description = "Unauthorized - authentication required"
-    )
-    @Secured(SecurityRule.IS_AUTHENTICATED)
-    public CompletableFuture<HttpResponse<List<VideoData>>> list(
-        Authentication auth
-    ) {
-        var ownerId = getOwnerId(auth);
-        if (ownerId.isEmpty()) {
-            return CompletableFuture.completedFuture(HttpResponse.unauthorized());
-        }
-        return repository
-            .findReadyVideosForRecipientId(ownerId.get())
-            .thenApply(videos -> {
-                return HttpResponse.ok(videos.stream().map(ReadyVideo::data).toList());
-            });
+  )
+  @ApiResponse(
+    responseCode = "401",
+    description = "Unauthorized - authentication required"
+  )
+  @Secured(SecurityRule.IS_AUTHENTICATED)
+  public CompletableFuture<HttpResponse<List<VideoData>>> list(
+    Authentication auth
+  ) {
+    var ownerId = getOwnerId(auth);
+    if (ownerId.isEmpty()) {
+      return CompletableFuture.completedFuture(HttpResponse.unauthorized());
     }
+    return repository
+      .findReadyVideosForRecipientId(ownerId.get())
+      .thenApply(videos -> {
+        return HttpResponse.ok(videos.stream().map(ReadyVideo::data).toList());
+      });
+  }
 
-    @Get("/count")
-    @Operation(
-        summary = "Count ready videos for recipient",
-        description = "Returns the number of ready videos for a given recipient ID"
+  @Get("count")
+  @Operation(
+    summary = "Count ready videos for recipient",
+    description = "Returns the number of ready videos for a given recipient ID"
+  )
+  @ApiResponse(
+    responseCode = "200",
+    description = "Count of ready videos",
+    content = @Content(
+      mediaType = "application/json",
+      schema = @Schema(implementation = Integer.class)
     )
-    @ApiResponse(
-        responseCode = "200",
-        description = "Count of ready videos",
-        content = @Content(
-            mediaType = "application/json",
-            schema = @Schema(implementation = Integer.class)
-        )
+  )
+  @Secured(SecurityRule.IS_ANONYMOUS)
+  public CompletableFuture<HttpResponse<CountResponse>> countReadyVideos(
+    @Parameter(
+      description = "Recipient ID to count ready videos for",
+      required = true
+    ) @QueryValue("recipientId") String recipientId
+  ) {
+    return repository
+      .countReadyVideosForRecipientId(recipientId)
+      .thenApply(count -> HttpResponse.ok(new CountResponse(count)));
+  }
+
+  @Serdeable
+  public static record CountResponse(Long count) {}
+
+  @Get
+  @ApiResponse(
+    responseCode = "200",
+    description = "List of user's handled videos",
+    content = @Content(
+      mediaType = "application/json",
+      schema = @Schema(implementation = VideoData.class)
     )
-    @Secured(SecurityRule.IS_ANONYMOUS)
-    public CompletableFuture<HttpResponse<Integer>> countReadyVideos(
-        @Parameter(
-            description = "Recipient ID to count ready videos for",
-            required = true
-        ) @QueryValue("recipientId") String recipientId
-    ) {
-        return repository
-            .countByRecipientIdAndStatusOrderByReadyTimestamp(recipientId, "ready")
-            .thenApply(count -> HttpResponse.ok(count));
+  )
+  @ApiResponse(
+    responseCode = "401",
+    description = "Unauthorized - authentication required"
+  )
+  @Secured(SecurityRule.IS_AUTHENTICATED)
+  public CompletableFuture<HttpResponse<Page<VideoData>>> listHandled(
+    Authentication auth,
+    Pageable page
+  ) {
+    var ownerId = getOwnerId(auth);
+    if (ownerId.isEmpty()) {
+      return CompletableFuture.completedFuture(HttpResponse.unauthorized());
     }
+    return repository
+      .findHandledVideosForRecipientId(ownerId.get(), page)
+      .thenApply(videos -> {
+        return HttpResponse.ok(videos.map(HandledVideo::data));
+      });
+  }
 }

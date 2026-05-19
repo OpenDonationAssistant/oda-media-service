@@ -3,8 +3,11 @@ package io.github.opendonationassistant.media.repository;
 import io.github.opendonationassistant.commons.logging.ODALogger;
 import io.github.opendonationassistant.events.history.HistoryFacade;
 import io.github.opendonationassistant.media.senders.ReadyVideoNotificationSender;
+import io.github.opendonationassistant.media.video.HandledVideo;
 import io.github.opendonationassistant.media.video.prepared.PreparedVideo;
 import io.github.opendonationassistant.media.video.ready.ReadyVideo;
+import io.micronaut.data.model.Page;
+import io.micronaut.data.model.Pageable;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.util.List;
@@ -46,13 +49,6 @@ public class VideoRepository {
       );
   }
 
-  public Optional<ReadyVideo> findReadyVideo(@Nullable String id) {
-    return Optional.ofNullable(id)
-      .flatMap(dataRepository::findById)
-      .filter(it -> "ready".equals(it.status()))
-      .map(data -> new ReadyVideo(data, dataRepository));
-  }
-
   public CompletableFuture<List<PreparedVideo>> findPreparedVideosForPayment(
     @Nullable String paymentId
   ) {
@@ -87,6 +83,22 @@ public class VideoRepository {
     });
   }
 
+  public Optional<ReadyVideo> findReadyVideo(@Nullable String id) {
+    return Optional.ofNullable(id)
+      .flatMap(dataRepository::findById)
+      .filter(it -> "ready".equals(it.status()))
+      .map(data -> new ReadyVideo(data, dataRepository));
+  }
+
+  public CompletableFuture<Long> countReadyVideosForRecipientId(
+    String recipientId
+  ) {
+    return dataRepository.countByRecipientIdAndStatus(
+      recipientId,
+      "ready"
+    );
+  }
+
   public CompletableFuture<List<ReadyVideo>> findReadyVideosForRecipientId(
     String recipientId
   ) {
@@ -97,6 +109,21 @@ public class VideoRepository {
           .stream()
           .map(data -> new ReadyVideo(data, dataRepository))
           .toList()
+      );
+  }
+
+  public CompletableFuture<Page<HandledVideo>> findHandledVideosForRecipientId(
+    String recipientId,
+    Pageable pageable
+  ) {
+    return dataRepository
+      .findByRecipientIdAndStatusOrderByReadyTimestamp(
+        recipientId,
+        "handled",
+        pageable
+      )
+      .thenApply(videos ->
+        videos.map(data -> new HandledVideo(data, dataRepository))
       );
   }
 }

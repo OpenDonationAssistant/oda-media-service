@@ -235,8 +235,8 @@ public class PrepareVideo {
         }
         var viewCount = Optional.ofNullable(video.statistics())
           .map(Statistics::viewCount)
-          .map(Integer::parseInt)
-          .orElse(0);
+          .map(Long::parseLong)
+          .orElse(0L);
         if (viewCount < settings.minViewAmount()) {
           throw Problem.builder()
             .withTitle("Incorrect media")

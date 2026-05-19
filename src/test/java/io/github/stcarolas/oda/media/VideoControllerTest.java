@@ -1,14 +1,17 @@
 package io.github.stcarolas.oda.media;
 
 import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.instancio.Select.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.util.regex.Pattern;
-
+import io.github.opendonationassistant.media.VideoController;
+import io.github.opendonationassistant.media.repository.VideoData;
+import io.github.opendonationassistant.media.repository.VideoDataRepository;
 import io.micronaut.context.ApplicationContext;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import io.restassured.specification.RequestSpecification;
 import jakarta.inject.Inject;
+import org.instancio.Instancio;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -17,6 +20,49 @@ public class VideoControllerTest {
 
   @Inject
   ApplicationContext context;
+
+  @Inject
+  VideoDataRepository dataRepository;
+
+  @Inject
+  VideoController controller;
+
+  @Test
+  public void testGettingCountOfReadyVideos() {
+    var videoTemplate = Instancio.of(VideoData.class)
+      .set(field(VideoData::recipientId), "testuser")
+      .toModel();
+
+    var response = controller.countReadyVideos("testuser").join();
+    assertEquals(0, response.body().count());
+
+    var readyVideos = Instancio.of(videoTemplate)
+      .set(field(VideoData::status), "ready")
+      .stream()
+      .limit(5);
+    readyVideos.forEach(dataRepository::save);
+    var handledVideos = Instancio.of(videoTemplate)
+      .set(field(VideoData::status), "handled")
+      .stream()
+      .limit(6);
+    handledVideos.forEach(dataRepository::save);
+    var preparedVideos = Instancio.of(videoTemplate)
+      .set(field(VideoData::status), "prepared")
+      .stream()
+      .limit(7);
+    preparedVideos.forEach(dataRepository::save);
+
+    response = controller.countReadyVideos("testuser").join();
+    assertEquals(5, response.body().count());
+  }
+
+  @Test
+  public void testGettingSecondPageOfHandledVideos() {
+    var videoTemplate = Instancio.of(VideoData.class)
+      .set(field(VideoData::status), "handled")
+      .set(field(VideoData::recipientId), "testuser")
+      .toModel();
+  }
 
   // @Test
   // public void testSrcRegexp() {

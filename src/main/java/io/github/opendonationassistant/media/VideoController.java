@@ -147,7 +147,7 @@ public class VideoController extends BaseController {
   @Serdeable
   public static record CountResponse(Long count) {}
 
-  @Get
+  @Get("handled")
   @ApiResponse(
     responseCode = "200",
     description = "List of user's handled videos",

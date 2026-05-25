@@ -16,6 +16,8 @@ import io.github.opendonationassistant.settings.repository.MediaSettings;
 import io.github.opendonationassistant.settings.repository.MediaSettingsRepository;
 import io.micronaut.data.model.Page;
 import io.micronaut.data.model.Pageable;
+import io.micronaut.http.HttpStatus;
+import io.micronaut.problem.HttpStatusType;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.time.Duration;
@@ -26,6 +28,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jspecify.annotations.Nullable;
+import org.zalando.problem.Problem;
 
 @Singleton
 public class VideoRepository {
@@ -175,7 +178,11 @@ public class VideoRepository {
   ) {
     if (!settings.getData().vkvideoEnabled()) {
       return CompletableFuture.failedFuture(
-        new IllegalArgumentException("VK Video requests are disabled")
+        Problem.builder()
+          .withTitle("Incorrect media")
+          .withStatus(new HttpStatusType(HttpStatus.BAD_REQUEST))
+          .withDetail("VK Video requests are disabled")
+          .build()
       );
     }
     var id = Generators.timeBasedEpochGenerator().generate().toString();
@@ -186,13 +193,19 @@ public class VideoRepository {
       .thenApply(info -> {
         log.debug("Got vk video info", Map.of("info", info));
         if (!settings.passWordsBlacklist(info.title())) {
-          throw new IllegalArgumentException(
-            "Video contains blacklisted words"
-          );
+          throw Problem.builder()
+            .withTitle("Incorrect media")
+            .withStatus(new HttpStatusType(HttpStatus.BAD_REQUEST))
+            .withDetail("Video contains blacklisted words")
+            .build();
         }
         var matcher = SRC_PATTERN.matcher(info.html().replaceAll("\\n", ""));
         if (!matcher.matches()) {
-          throw new IllegalArgumentException("Unable to parse video");
+          throw Problem.builder()
+            .withTitle("Incorrect media")
+            .withStatus(new HttpStatusType(HttpStatus.BAD_REQUEST))
+            .withDetail("Unable to parse video")
+            .build();
         }
         return new VideoData(
           id,
@@ -218,20 +231,32 @@ public class VideoRepository {
   ) {
     if (!settings.getData().youtubeEnabled()) {
       return CompletableFuture.failedFuture(
-        new IllegalArgumentException("YouTube requests are disabled")
+        Problem.builder()
+          .withTitle("Incorrect media")
+          .withStatus(new HttpStatusType(HttpStatus.BAD_REQUEST))
+          .withDetail("YouTube requests are disabled")
+          .build()
       );
     }
     var id = Generators.timeBasedEpochGenerator().generate().toString();
 
     if (url == null || url.isBlank()) {
       return CompletableFuture.failedFuture(
-        new IllegalArgumentException("URL is empty")
+        Problem.builder()
+          .withTitle("Incorrect media")
+          .withStatus(new HttpStatusType(HttpStatus.BAD_REQUEST))
+          .withDetail("URL is empty")
+          .build()
       );
     }
     Matcher matcher = YOUTUBE_PATTERN.matcher(url);
     if (!matcher.matches()) {
       return CompletableFuture.failedFuture(
-        new IllegalArgumentException("Invalid YouTube URL")
+        Problem.builder()
+          .withTitle("Incorrect media")
+          .withStatus(new HttpStatusType(HttpStatus.BAD_REQUEST))
+          .withDetail("Invalid YouTube URL")
+          .build()
       );
     }
     String videoId = matcher.group(6);
@@ -244,7 +269,11 @@ public class VideoRepository {
           Map.of("videoId", videoId)
         );
         if (found.items() == null || found.items().isEmpty()) {
-          throw new IllegalArgumentException("Video not found on YouTube");
+          throw Problem.builder()
+            .withTitle("Incorrect media")
+            .withStatus(new HttpStatusType(HttpStatus.BAD_REQUEST))
+            .withDetail("Video not found on YouTube")
+            .build();
         }
         Video video = found.items().iterator().next();
 
@@ -257,7 +286,11 @@ public class VideoRepository {
           settings.getData().maxLen() != null &&
           duration > settings.getData().maxLen()
         ) {
-          throw new IllegalArgumentException("Video is too long");
+          throw Problem.builder()
+            .withTitle("Incorrect media")
+            .withStatus(new HttpStatusType(HttpStatus.BAD_REQUEST))
+            .withDetail("Video is too long")
+            .build();
         }
 
         var viewCount = Optional.ofNullable(video.statistics())
@@ -265,7 +298,11 @@ public class VideoRepository {
           .map(Long::parseLong)
           .orElse(0L);
         if (viewCount < settings.minViewAmount()) {
-          throw new IllegalArgumentException("Video has too few views");
+          throw Problem.builder()
+            .withTitle("Incorrect media")
+            .withStatus(new HttpStatusType(HttpStatus.BAD_REQUEST))
+            .withDetail("Video has too few views")
+            .build();
         }
 
         if (
@@ -274,9 +311,11 @@ public class VideoRepository {
             .filter(title -> settings.passWordsBlacklist(title))
             .isEmpty()
         ) {
-          throw new IllegalArgumentException(
-            "Video contains blacklisted words"
-          );
+          throw Problem.builder()
+            .withTitle("Incorrect media")
+            .withStatus(new HttpStatusType(HttpStatus.BAD_REQUEST))
+            .withDetail("Video contains blacklisted words")
+            .build();
         }
 
         if (
@@ -286,14 +325,20 @@ public class VideoRepository {
             .map(it -> "ytAgeRestricted".equals(it))
             .orElse(false)
         ) {
-          throw new IllegalArgumentException(
-            "Video must not be age-restricted"
-          );
+          throw Problem.builder()
+            .withTitle("Incorrect media")
+            .withStatus(new HttpStatusType(HttpStatus.BAD_REQUEST))
+            .withDetail("Video must not be age-restricted")
+            .build();
         }
 
         var snippet = video.snippet();
         if (snippet == null) {
-          throw new IllegalArgumentException("Invalid video");
+          throw Problem.builder()
+            .withTitle("Incorrect media")
+            .withStatus(new HttpStatusType(HttpStatus.BAD_REQUEST))
+            .withDetail("Invalid video")
+            .build();
         }
 
         return new VideoData(

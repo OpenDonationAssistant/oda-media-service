@@ -15,10 +15,13 @@ public class AddMediaCommandHandler
   }
 
   @Override
-  public void handle(AddMediaCommand message) throws IOException {
-
-  }
+  public void handle(AddMediaCommand message) throws IOException {}
 
   @Serdeable
-  public static record AddMediaCommand() {}
+  public static record AddMediaCommand(
+    String url,
+    String requester,
+    String recipientId,
+    String system
+  ) {}
 }

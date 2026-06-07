@@ -129,10 +129,7 @@ public class VideoRepository {
   public CompletableFuture<Long> countReadyVideosForRecipientId(
     String recipientId
   ) {
-    return dataRepository.countByRecipientIdAndStatus(
-      recipientId,
-      "ready"
-    );
+    return dataRepository.countByRecipientIdAndStatus(recipientId, "ready");
   }
 
   public CompletableFuture<List<ReadyVideo>> findReadyVideosForRecipientId(
@@ -264,10 +261,7 @@ public class VideoRepository {
     return youTube
       .list(videoId)
       .thenApply(found -> {
-        log.debug(
-          "YouTube video search result",
-          Map.of("videoId", videoId)
-        );
+        log.debug("YouTube video search result", Map.of("videoId", videoId));
         if (found.items() == null || found.items().isEmpty()) {
           throw Problem.builder()
             .withTitle("Incorrect media")

@@ -1,6 +1,7 @@
 package io.github.opendonationassistant.media.listeners;
 
 import io.github.opendonationassistant.events.MessageProcessor;
+import io.github.opendonationassistant.rabbit.Exchange;
 import io.github.opendonationassistant.rabbit.Queue;
 import io.micronaut.messaging.annotation.MessageHeader;
 import io.micronaut.rabbitmq.annotation.RabbitListener;
@@ -8,12 +9,20 @@ import io.micronaut.rabbitmq.bind.RabbitAcknowledgement;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 @RabbitListener
 public class CommandsListener {
 
   public static final String QUEUE_NAME = "media.commands";
   public static final Queue QUEUE = new Queue(QUEUE_NAME);
+  public static final List<Exchange> BINDINGS = List.of(
+    Exchange.Exchange(
+      "commands",
+      Map.of("command.AddMediaCommand", CommandsListener.QUEUE)
+    )
+  );
 
   private final MessageProcessor processor;
 

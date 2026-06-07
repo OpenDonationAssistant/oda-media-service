@@ -1,5 +1,6 @@
 # ODA Media Service
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/OpenDonationAssistant/oda-media-service)
+[![CodeFactor](https://www.codefactor.io/repository/github/opendonationassistant/oda-media-service/badge)](https://www.codefactor.io/repository/github/opendonationassistant/oda-media-service)
 ![Sonar Tech Debt](https://img.shields.io/sonar/tech_debt/OpenDonationAssistant_oda-media-service?server=https%3A%2F%2Fsonarcloud.io)
 ![Sonar Violations](https://img.shields.io/sonar/violations/OpenDonationAssistant_oda-media-service?server=https%3A%2F%2Fsonarcloud.io)
 ![Sonar Tests](https://img.shields.io/sonar/tests/OpenDonationAssistant_oda-media-service?server=https%3A%2F%2Fsonarcloud.io)

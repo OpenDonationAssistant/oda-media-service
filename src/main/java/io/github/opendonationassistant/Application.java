@@ -7,6 +7,7 @@ import io.github.opendonationassistant.rabbit.Exchange;
 import io.micronaut.context.ApplicationContextBuilder;
 import io.micronaut.context.ApplicationContextConfigurer;
 import io.micronaut.context.annotation.ContextConfigurer;
+import io.micronaut.context.annotation.Factory;
 import io.micronaut.rabbitmq.connect.ChannelInitializer;
 import io.micronaut.runtime.Micronaut;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @OpenAPIDefinition(info = @Info(title = "oda-media-service", version = "1.0.0"))
+@Factory
 public class Application {
 
   public static void main(String[] args) {

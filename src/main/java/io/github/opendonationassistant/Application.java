@@ -4,6 +4,7 @@ import io.github.opendonationassistant.media.listeners.CommandsListener;
 import io.github.opendonationassistant.media.listeners.EventsListener;
 import io.github.opendonationassistant.rabbit.AMQPConfiguration;
 import io.github.opendonationassistant.rabbit.Exchange;
+import io.github.opendonationassistant.settings.listener.WidgetConfigListener;
 import io.micronaut.context.ApplicationContextBuilder;
 import io.micronaut.context.ApplicationContextConfigurer;
 import io.micronaut.context.annotation.ContextConfigurer;
@@ -39,6 +40,7 @@ public class Application {
     List<Exchange> bindings = new ArrayList<>();
     bindings.addAll(CommandsListener.BINDINGS);
     bindings.addAll(EventsListener.BINDINGS);
+    bindings.addAll(WidgetConfigListener.BINDINGS);
     return new AMQPConfiguration(bindings);
   }
 }

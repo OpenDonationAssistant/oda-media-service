@@ -160,13 +160,25 @@ public class VideoRepository {
       );
   }
 
-  public CompletableFuture<VideoData> create(String recipientId, String url) {
+  public CompletableFuture<PreparedVideo> create(
+    String recipientId,
+    String url
+  ) {
     log.info("Creating video", Map.of("url", url, "recipientId", recipientId));
     final MediaSettings settings = repository.getByRecipientId(recipientId);
     if (url.contains("vkvideo.ru")) {
-      return createFromVk(settings, url);
+      return createFromVk(settings, url).thenApply(this::convert);
     }
-    return createFromYoutube(settings, url);
+    return createFromYoutube(settings, url).thenApply(this::convert);
+  }
+
+  private PreparedVideo convert(VideoData data) {
+    return new PreparedVideo(
+      data,
+      dataRepository,
+      notificationSender,
+      historyFacade
+    );
   }
 
   private CompletableFuture<VideoData> createFromVk(

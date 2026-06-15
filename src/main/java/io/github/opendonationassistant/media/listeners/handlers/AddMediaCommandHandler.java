@@ -28,7 +28,10 @@ public class AddMediaCommandHandler
   @Override
   public void handle(AddMediaCommand message) throws IOException {
     try {
-      videoRepository.create(message.recipientId(), message.url()).join();
+      videoRepository
+        .create(message.recipientId(), message.url())
+        .join()
+        .makeReady(message.requester(), message.recipientId(), null);
     } catch (Exception e) {
       log.info("Failed to add media", Map.of("message", message));
     }

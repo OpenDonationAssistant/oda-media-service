@@ -24,7 +24,7 @@ public class MarkAllListened extends BaseController {
     this.repository = repository;
   }
 
-  @Post("/commands/media/markAllListened")
+  @Post("/media/commands/mark-all-listened")
   @Secured(SecurityRule.IS_AUTHENTICATED)
   public CompletableFuture<HttpResponse<Void>> markAllListened(
     Authentication auth,

@@ -20,7 +20,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -29,10 +28,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Controller("/media/available")
-@Tag(
-  name = "Available Media",
-  description = "Search and retrieve available media from external providers"
-)
 public class AvailableMediaController {
 
   private Logger log = LoggerFactory.getLogger(AvailableMediaController.class);

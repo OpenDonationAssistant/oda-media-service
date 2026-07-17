@@ -1,14 +1,6 @@
 micronaut:
   application:
     name: oda-media-service
-  security:
-    authentication: cookie
-    token:
-      jwt:
-        signatures:
-          jwks:
-            keycloak:
-              url: ${JWKS_URI}
   http.services.youtube.url: https://youtube.googleapis.com
 flyway:
   datasources:

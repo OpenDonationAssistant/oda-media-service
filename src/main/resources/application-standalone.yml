@@ -11,3 +11,13 @@ rabbitmq.host: ${RABBITMQ_HOST}
 logger:
   levels:
     io.github.stcarolas: INFO
+micronaut:
+  security:
+    authentication: cookie
+    token:
+      jwt:
+        signatures:
+          jwks:
+            keycloak:
+              url: ${JWKS_URI}
+

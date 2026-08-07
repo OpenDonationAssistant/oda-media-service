@@ -15,3 +15,8 @@ jpa:
   default:
     entity-scan:
         packages: 'io.github.opendonationassistant'
+endpoints:
+  prometheus:
+    sensitive: false
+  metrics:
+    sensitive: false

@@ -3,8 +3,7 @@ package io.github.opendonationassistant.settings.repository;
 import io.github.opendonationassistant.commons.ToString;
 import io.github.opendonationassistant.events.config.ConfigCommand;
 import io.github.opendonationassistant.events.config.ConfigCommandSender;
-import io.github.opendonationassistant.events.widget.WidgetConfig;
-import io.github.opendonationassistant.events.widget.WidgetProperty;
+import io.github.opendonationassistant.events.widget.Widget;
 import io.github.opendonationassistant.settings.repository.MediaSettingsData.TARIFICATION;
 import java.util.Arrays;
 import java.util.List;
@@ -48,7 +47,7 @@ public class MediaSettings {
       );
   }
 
-  public void apply(WidgetConfig config) {
+  public void apply(Widget.WidgetConfig config) {
     var tooltip = get(config, "requestTooltip")
       .map(property -> (String) property.value())
       .orElse("");
@@ -166,7 +165,10 @@ public class MediaSettings {
       .isEmpty();
   }
 
-  private Optional<WidgetProperty> get(WidgetConfig config, String property) {
+  private Optional<Widget.WidgetProperty> get(
+    Widget.WidgetConfig config,
+    String property
+  ) {
     return Optional.ofNullable(config.properties())
       .orElse(List.of())
       .stream()

@@ -13,11 +13,21 @@ import io.micronaut.rabbitmq.connect.ChannelInitializer;
 import io.micronaut.runtime.Micronaut;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.info.License;
 import jakarta.inject.Singleton;
 import java.util.ArrayList;
 import java.util.List;
 
-@OpenAPIDefinition(info = @Info(title = "oda-media-service", version = "1.0.0"))
+@OpenAPIDefinition(
+  info = @Info(
+    title = "oda-media-service",
+    version = "0.10.0",
+    license = @License(
+      name = "AGPL-3.0",
+      url = "https://www.gnu.org/licenses/agpl-3.0.en.html"
+    )
+  )
+)
 @Factory
 public class Application {
 

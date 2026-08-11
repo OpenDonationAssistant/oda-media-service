@@ -3,13 +3,13 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.github.opendonationassistant</groupId>
   <artifactId>oda-media-service</artifactId>
-  <version>0.9.0</version>
+  <version>0.10.0</version>
   <packaging>${packaging}</packaging>
 
   <parent>
     <groupId>io.micronaut.platform</groupId>
     <artifactId>micronaut-parent</artifactId>
-    <version>5.0.2</version>
+    <version>5.1.0</version>
   </parent>
 
   <properties>
@@ -40,7 +40,7 @@
     <dependency>
       <groupId>io.github.opendonationassistant</groupId>
       <artifactId>oda-rabbit-conf</artifactId>
-      <version>0.10.209</version>
+      <version>0.11.232</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.uuid</groupId>
@@ -272,28 +272,7 @@
           </compilerArgs>
         </configuration>
       </plugin>
-      <plugin>
-        <groupId>org.openapitools</groupId>
-        <artifactId>openapi-generator-maven-plugin</artifactId>
-        <version>7.2.0</version>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>generate</goal>
-            </goals>
-            <configuration>
-              <inputSpec>${project.basedir}/target/classes/META-INF/swagger/oda-media-service-1.0.0.yml</inputSpec>
-              <generatorName>typescript-axios</generatorName>
-              <configurationFile>openapi-config.json</configurationFile>
-              <configOptions>
-                <output>${project.build.directory}/</output>
-                <npmVersion>${project.version}</npmVersion>
-              </configOptions>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
+
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>

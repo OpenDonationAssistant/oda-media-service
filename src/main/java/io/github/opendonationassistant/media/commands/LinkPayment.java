@@ -2,6 +2,7 @@ package io.github.opendonationassistant.media.commands;
 
 import io.github.opendonationassistant.commons.Amount;
 import io.github.opendonationassistant.commons.logging.ODALogger;
+import io.github.opendonationassistant.media.metrics.MediaMetrics;
 import io.github.opendonationassistant.media.repository.VideoRepository;
 import io.github.opendonationassistant.media.video.prepared.PreparedVideo;
 import io.github.opendonationassistant.settings.repository.MediaSettingsRepository;
@@ -26,14 +27,17 @@ public class LinkPayment {
 
   private final VideoRepository videoRepository;
   private final MediaSettingsRepository settingsRepository;
+  private final MediaMetrics metrics;
 
   @Inject
   public LinkPayment(
     VideoRepository videoRepository,
-    MediaSettingsRepository settingsRepository
+    MediaSettingsRepository settingsRepository,
+    MediaMetrics metrics
   ) {
     this.videoRepository = videoRepository;
     this.settingsRepository = settingsRepository;
+    this.metrics = metrics;
   }
 
   @Transactional
@@ -49,7 +53,10 @@ public class LinkPayment {
         .stream()
         .flatMap(id -> videoRepository.findPreparedVideo(id).stream())
         .toList();
-      found.forEach(video -> video.linkPayment(command.paymentId()));
+      found.forEach(video -> {
+        video.linkPayment(command.paymentId());
+        metrics.mediaPaymentLinked();
+      });
       Integer songCost = Optional.ofNullable(
         settingsRepository
           .getByRecipientId(command.recipientId())

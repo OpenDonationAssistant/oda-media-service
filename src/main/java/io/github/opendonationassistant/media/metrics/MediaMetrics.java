@@ -11,6 +11,10 @@ public class MediaMetrics {
 
   public static final String REQUESTED_METRIC_NAME = "media.requested";
   public static final String ADDED_METRIC_NAME = "media.added";
+  public static final String PAYMENT_REQUESTED_METRIC_NAME =
+    "media.payment.requested";
+  public static final String PAYMENT_ADDED_METRIC_NAME = "media.payment.added";
+  public static final String PAYMENT_LINKED_METRIC_NAME = "media.payment.linked";
   public static final String SYSTEM_TAG = "system";
   public static final String UNKNOWN_SYSTEM = "unknown";
 
@@ -27,6 +31,14 @@ public class MediaMetrics {
 
   public void mediaAdded(String system) {
     counter(ADDED_METRIC_NAME, system).increment();
+  }
+
+  public void mediaPaymentAdded(String system) {
+    counter(PAYMENT_ADDED_METRIC_NAME, system).increment();
+  }
+
+  public void mediaPaymentLinked() {
+    registry.counter(PAYMENT_LINKED_METRIC_NAME).increment();
   }
 
   private Counter counter(String name, String system) {

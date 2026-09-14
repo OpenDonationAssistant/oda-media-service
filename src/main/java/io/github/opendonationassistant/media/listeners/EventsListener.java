@@ -20,7 +20,7 @@ public class EventsListener {
     new io.github.opendonationassistant.rabbit.Queue(QUEUE_NAME);
   public static final List<Exchange> BINDINGS = List.of(
     Exchange.Exchange(
-      "events",
+      "history",
       Map.of("event.HistoryItemEvent", EventsListener.QUEUE)
     )
   );

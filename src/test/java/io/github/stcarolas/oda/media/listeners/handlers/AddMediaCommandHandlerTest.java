@@ -1,5 +1,6 @@
 package io.github.stcarolas.oda.media.listeners.handlers;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -11,6 +12,7 @@ import io.github.opendonationassistant.media.metrics.MediaMetrics;
 import io.github.opendonationassistant.media.repository.VideoRepository;
 import io.github.opendonationassistant.media.video.prepared.PreparedVideo;
 import io.micronaut.serde.ObjectMapper;
+import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -60,8 +62,7 @@ public class AddMediaCommandHandlerTest {
   }
 
   @Test
-  public void countsRequestedButNotAddedWhenMediaCreationFails()
-    throws Exception {
+  public void recordsFailureAndPropagatesWhenMediaCreationFails() {
     var command = new AddMediaCommand(
       "https://youtu.be/kXYiU_JCYtU",
       "viewer",
@@ -72,10 +73,11 @@ public class AddMediaCommandHandlerTest {
       CompletableFuture.failedFuture(new RuntimeException("invalid video"))
     );
 
-    handler.handle(command);
+    assertThrows(IOException.class, () -> handler.handle(command));
 
     verify(metrics).mediaRequested("twitch");
     verify(metrics, never()).mediaAdded("twitch");
+    verify(metrics).mediaFailed("twitch");
   }
 }
 

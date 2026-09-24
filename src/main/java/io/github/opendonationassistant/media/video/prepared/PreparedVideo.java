@@ -7,6 +7,7 @@ import io.github.opendonationassistant.media.repository.VideoData;
 import io.github.opendonationassistant.media.repository.VideoDataRepository;
 import io.github.opendonationassistant.media.senders.ReadyVideoNotificationSender;
 import io.github.opendonationassistant.media.video.ready.ReadyVideo;
+import java.time.Instant;
 import java.util.Map;
 import org.jspecify.annotations.Nullable;
 
@@ -47,7 +48,11 @@ public class PreparedVideo {
   ) {
     log.info("Make video ready", Map.of("id", data.id()));
     var video = new ReadyVideo(
-      data.withOwner(owner).withRecipientId(recipient).withStatus("ready"),
+      data
+        .withOwner(owner)
+        .withRecipientId(recipient)
+        .withStatus("ready")
+        .withReadyTimestamp(Instant.now()),
       repository
     );
     video.save();

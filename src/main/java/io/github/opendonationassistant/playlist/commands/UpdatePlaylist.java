@@ -35,9 +35,9 @@ public class UpdatePlaylist extends BaseController {
     if (ownerId.isEmpty()) {
       return HttpResponse.unauthorized();
     }
-    // todo check owner id
     return repository
       .get(command.id())
+      .filter(playlist -> ownerId.get().equals(playlist.getOwnerId()))
       .map(playlist -> playlist.update(command.items()))
       .map(Playlist::asPlaylistDto)
       .map(HttpResponse::ok)

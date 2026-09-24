@@ -43,6 +43,11 @@
       <version>0.11.232</version>
     </dependency>
     <dependency>
+      <groupId>io.github.opendonationassistant</groupId>
+      <artifactId>oda-test-utils</artifactId>
+      <version>0.11.232</version>
+    </dependency>
+    <dependency>
       <groupId>com.fasterxml.uuid</groupId>
       <artifactId>java-uuid-generator</artifactId>
       <version>5.0.0</version>

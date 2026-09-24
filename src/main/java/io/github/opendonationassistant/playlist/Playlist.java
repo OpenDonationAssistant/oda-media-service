@@ -34,6 +34,10 @@ public class Playlist {
     this.repository = repository;
   }
 
+  public String getOwnerId() {
+    return ownerId;
+  }
+
   public Playlist update(List<PlaylistItem> items) {
     return new Playlist(id, title, ownerId, items, repository).save();
   }

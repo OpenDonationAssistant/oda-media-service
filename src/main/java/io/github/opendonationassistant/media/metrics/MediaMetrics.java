@@ -11,6 +11,7 @@ public class MediaMetrics {
 
   public static final String REQUESTED_METRIC_NAME = "media.requested";
   public static final String ADDED_METRIC_NAME = "media.added";
+  public static final String FAILED_METRIC_NAME = "media.failed";
   public static final String PAYMENT_REQUESTED_METRIC_NAME =
     "media.payment.requested";
   public static final String PAYMENT_ADDED_METRIC_NAME = "media.payment.added";
@@ -31,6 +32,10 @@ public class MediaMetrics {
 
   public void mediaAdded(String system) {
     counter(ADDED_METRIC_NAME, system).increment();
+  }
+
+  public void mediaFailed(String system) {
+    counter(FAILED_METRIC_NAME, system).increment();
   }
 
   public void mediaPaymentAdded(String system) {

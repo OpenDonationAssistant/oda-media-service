@@ -73,6 +73,13 @@ public class PrepareVideo {
   public CompletableFuture<HttpResponse<PrepareVideoResponse>> prepareVideo(
     @Body PrepareVideoCommand command
   ) {
+    if (!StringUtils.hasText(command.url())) {
+      throw Problem.builder()
+        .withTitle("Incorrect media")
+        .withStatus(new HttpStatusType(HttpStatus.BAD_REQUEST))
+        .withDetail("Отсутствует ссылка")
+        .build();
+    }
     log.info("Preparing media", Map.of("url", command.url()));
     final MediaSettings settings = repository.getByRecipientId(
       command.recipientId()

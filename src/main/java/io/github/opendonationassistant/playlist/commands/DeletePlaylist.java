@@ -32,10 +32,13 @@ public class DeletePlaylist extends BaseController {
     if (ownerId.isEmpty()) {
       return HttpResponse.unauthorized();
     }
-    repository
+    var playlist = repository
       .get(command.id())
-      .filter(p -> ownerId.get().equals(ownerId.get()))
-      .ifPresent(p -> p.delete());
+      .filter(p -> ownerId.get().equals(p.getOwnerId()));
+    if (playlist.isEmpty()) {
+      return HttpResponse.unauthorized();
+    }
+    playlist.get().delete();
     return HttpResponse.ok();
   }
 

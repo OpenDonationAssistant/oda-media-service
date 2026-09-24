@@ -164,6 +164,15 @@ public class VideoRepository {
     String recipientId,
     String url
   ) {
+    if (url == null || url.isBlank()) {
+      return CompletableFuture.failedFuture(
+        Problem.builder()
+          .withTitle("Incorrect media")
+          .withStatus(new HttpStatusType(HttpStatus.BAD_REQUEST))
+          .withDetail("URL is empty")
+          .build()
+      );
+    }
     log.info("Creating video", Map.of("url", url, "recipientId", recipientId));
     final MediaSettings settings = repository.getByRecipientId(recipientId);
     if (url.contains("vkvideo.ru")) {

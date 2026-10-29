@@ -9,6 +9,8 @@ import io.micronaut.serde.annotation.Serdeable;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.io.IOException;
+import java.util.Map;
+import java.util.Objects;
 
 @Singleton
 public class AddMediaCommandHandler
@@ -41,7 +43,16 @@ public class AddMediaCommandHandler
       metrics.mediaAdded(message.system());
     } catch (Exception e) {
       metrics.mediaFailed(message.system());
+      log.context(
+        Map.of(
+          "url",
+          Objects.toString(message.url(), ""),
+          "recipientId",
+          Objects.toString(message.recipientId(), "")
+        )
+      );
       log.error("Failed to add media", e);
+      log.clear();
       throw new IOException("Failed to add media", e);
     }
   }

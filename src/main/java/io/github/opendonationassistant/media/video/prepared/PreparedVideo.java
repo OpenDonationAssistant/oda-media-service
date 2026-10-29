@@ -47,14 +47,15 @@ public class PreparedVideo {
     @Nullable String paymentId
   ) {
     log.info("Make video ready", Map.of("id", data.id()));
-    var video = new ReadyVideo(
-      data
-        .withOwner(owner)
-        .withRecipientId(recipient)
-        .withStatus("ready")
-        .withReadyTimestamp(Instant.now()),
-      repository
-    );
+    var updated = data
+      .withOwner(owner)
+      .withRecipientId(recipient)
+      .withStatus("ready")
+      .withReadyTimestamp(Instant.now());
+    if (paymentId != null) {
+      updated = updated.withPaymentId(paymentId);
+    }
+    var video = new ReadyVideo(updated, repository);
     video.save();
     historyFacade
       .sendEvent(

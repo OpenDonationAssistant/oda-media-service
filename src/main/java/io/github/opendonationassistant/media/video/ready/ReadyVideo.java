@@ -3,6 +3,7 @@ package io.github.opendonationassistant.media.video.ready;
 import io.github.opendonationassistant.commons.logging.ODALogger;
 import io.github.opendonationassistant.media.repository.VideoData;
 import io.github.opendonationassistant.media.repository.VideoDataRepository;
+import io.github.opendonationassistant.media.video.HandledVideo;
 import java.util.Map;
 
 public class ReadyVideo {
@@ -20,11 +21,12 @@ public class ReadyVideo {
     repository.update(data);
   }
 
-  public ReadyVideo makeHandled() {
+  public HandledVideo makeHandled() {
     log.info("Make video handled", Map.of("id", data.id()));
     this.data = data.withStatus("handled");
-    this.save();
-    return this;
+    var handled = new HandledVideo(this.data, repository);
+    handled.save();
+    return handled;
   }
 
   public VideoData data() {

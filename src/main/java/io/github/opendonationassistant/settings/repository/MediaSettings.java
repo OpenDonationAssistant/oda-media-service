@@ -5,7 +5,6 @@ import io.github.opendonationassistant.events.config.ConfigCommand;
 import io.github.opendonationassistant.events.config.ConfigCommandSender;
 import io.github.opendonationassistant.events.widget.Widget;
 import io.github.opendonationassistant.settings.repository.MediaSettingsData.TARIFICATION;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -95,12 +94,13 @@ public class MediaSettings {
         .map(property -> (Boolean) property.value())
         .orElse(true),
       tooltip,
-      Arrays.asList(
-        get(config, "wordsBlacklist")
-          .map(property -> (String) property.value())
-          .orElse("")
-          .split("\n")
-      )
+      get(config, "wordsBlacklist")
+        .map(property -> (String) property.value())
+        .orElse("")
+        .lines()
+        .map(String::trim)
+        .filter(word -> !word.isBlank())
+        .toList()
     );
 
     configCommandSender.send(
@@ -157,12 +157,13 @@ public class MediaSettings {
   }
 
   public boolean passWordsBlacklist(String title) {
-    var normalizedTitle = title.toLowerCase();
-    return this.data.wordsBlacklist()
+    var normalizedTitle = title.toLowerCase().trim();
+    return this.data
+      .wordsBlacklist()
       .stream()
-      .filter(word -> normalizedTitle.contains(word))
-      .findFirst()
-      .isEmpty();
+      .filter(word -> word != null && !word.isBlank())
+      .map(word -> word.toLowerCase().trim())
+      .noneMatch(normalizedTitle::contains);
   }
 
   private Optional<Widget.WidgetProperty> get(

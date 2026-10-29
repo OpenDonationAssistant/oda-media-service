@@ -115,6 +115,7 @@ public class PlaylistController extends BaseController {
     }
     return playlistRepository
       .get(playlistId)
+      .filter(playlist -> ownerId.get().equals(playlist.getOwnerId()))
       .map(playlist -> playlist.asPlaylistDto())
       .map(HttpResponse::ok)
       .orElse(HttpResponse.notFound());

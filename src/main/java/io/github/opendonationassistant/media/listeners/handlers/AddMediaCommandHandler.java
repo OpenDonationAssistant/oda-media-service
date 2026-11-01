@@ -1,67 +1,119 @@
 package io.github.opendonationassistant.media.listeners.handlers;
 
 import io.github.opendonationassistant.commons.logging.ODALogger;
-import io.github.opendonationassistant.events.AbstractMessageHandler;
 import io.github.opendonationassistant.media.metrics.MediaMetrics;
 import io.github.opendonationassistant.media.repository.VideoRepository;
-import io.micronaut.serde.ObjectMapper;
+import io.github.opendonationassistant.rabbit.Exchange;
+import io.micronaut.rabbitmq.annotation.Queue;
+import io.micronaut.rabbitmq.annotation.RabbitListener;
 import io.micronaut.serde.annotation.Serdeable;
 import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
-import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.regex.Pattern;
+import org.jspecify.annotations.Nullable;
+import org.zalando.problem.Problem;
 
-@Singleton
-public class AddMediaCommandHandler
-  extends AbstractMessageHandler<AddMediaCommandHandler.AddMediaCommand> {
+@RabbitListener
+public class AddMediaCommandHandler {
 
-  private ODALogger log = new ODALogger(this);
+  public static final String QUEUE_NAME = "media.add";
+  public static final io.github.opendonationassistant.rabbit.Queue QUEUE =
+    new io.github.opendonationassistant.rabbit.Queue(QUEUE_NAME);
+  public static final List<Exchange> BINDINGS = List.of(
+    Exchange.Exchange("rpc", Map.of("media.add", QUEUE))
+  );
 
+  private static final Pattern VIDEO_URL_PATTERN = Pattern.compile(
+    "\\S*(?:youtu\\.?be|vkvideo\\.ru)\\S*",
+    Pattern.CASE_INSENSITIVE
+  );
+
+  private static final Pattern TRAILING_PUNCTUATION_PATTERN = Pattern.compile(
+    "[,.;:!?)\\]}>\"']+$"
+  );
+
+  private final ODALogger log = new ODALogger(this);
   private final VideoRepository videoRepository;
   private final MediaMetrics metrics;
 
   @Inject
   public AddMediaCommandHandler(
-    ObjectMapper mapper,
     VideoRepository videoRepository,
     MediaMetrics metrics
   ) {
-    super(mapper);
     this.videoRepository = videoRepository;
     this.metrics = metrics;
   }
 
-  @Override
-  public void handle(AddMediaCommand message) throws IOException {
-    metrics.mediaRequested(message.system());
+  @Queue(QUEUE_NAME)
+  public AddMediaResponse handle(AddMediaRequest request) {
+    metrics.mediaRequested(request.system());
+    final var url = extractVideoUrl(request.url());
     try {
-      videoRepository
-        .create(message.recipientId(), message.url())
+      final var video = videoRepository
+        .create(request.recipientId(), url)
         .join()
-        .makeReady(message.requester(), message.recipientId(), null);
-      metrics.mediaAdded(message.system());
+        .makeReady(request.requester(), request.recipientId(), null);
+      metrics.mediaAdded(request.system());
+      return new AddMediaResponse(video.data().id(), "");
     } catch (Exception e) {
-      metrics.mediaFailed(message.system());
+      metrics.mediaFailed(request.system());
+      final var errorMessage = describeError(e);
       log.context(
         Map.of(
           "url",
-          Objects.toString(message.url(), ""),
+          Objects.toString(url, ""),
           "recipientId",
-          Objects.toString(message.recipientId(), "")
+          Objects.toString(request.recipientId(), ""),
+          "error",
+          errorMessage
         )
       );
       log.error("Failed to add media", e);
       log.clear();
-      throw new IOException("Failed to add media", e);
+      return new AddMediaResponse(null, errorMessage);
     }
   }
 
+  static String extractVideoUrl(@Nullable String message) {
+    if (message == null) {
+      return "";
+    }
+    final var text = message.trim();
+    final var matcher = VIDEO_URL_PATTERN.matcher(text);
+    if (!matcher.find()) {
+      return "";
+    }
+    return TRAILING_PUNCTUATION_PATTERN.matcher(matcher.group()).replaceAll("");
+  }
+
+  private static String describeError(Throwable error) {
+    var current = error;
+    while (
+      current.getCause() != null && current.getCause() != current
+    ) {
+      current = current.getCause();
+    }
+    if (current instanceof Problem problem) {
+      return Optional.ofNullable(problem.getDetail())
+        .filter(detail -> !detail.isBlank())
+        .or(() -> Optional.ofNullable(problem.getTitle()))
+        .orElse("");
+    }
+    return "Internal server error";
+  }
+
   @Serdeable
-  public static record AddMediaCommand(
+  public static record AddMediaRequest(
     String url,
     String requester,
     String recipientId,
     String system
   ) {}
+
+  @Serdeable
+  public static record AddMediaResponse(@Nullable String id, String message) {}
 }

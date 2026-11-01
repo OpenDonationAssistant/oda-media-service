@@ -1,7 +1,7 @@
 package io.github.opendonationassistant;
 
-import io.github.opendonationassistant.media.listeners.CommandsListener;
 import io.github.opendonationassistant.media.listeners.EventsListener;
+import io.github.opendonationassistant.media.listeners.handlers.AddMediaCommandHandler;
 import io.github.opendonationassistant.rabbit.AMQPConfiguration;
 import io.github.opendonationassistant.rabbit.Exchange;
 import io.github.opendonationassistant.settings.listener.WidgetConfigListener;
@@ -48,7 +48,7 @@ public class Application {
   @Singleton
   public ChannelInitializer rabbitConfiguration() {
     List<Exchange> bindings = new ArrayList<>();
-    bindings.addAll(CommandsListener.BINDINGS);
+    bindings.addAll(AddMediaCommandHandler.BINDINGS);
     bindings.addAll(EventsListener.BINDINGS);
     bindings.addAll(WidgetConfigListener.BINDINGS);
     return new AMQPConfiguration(bindings);

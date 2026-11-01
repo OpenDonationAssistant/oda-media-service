@@ -13,9 +13,9 @@ media/
 │   ├── LinkPayment.java         # POST /commands/media/linkPayment
 │   └── MarkAllListened.java     # POST /media/commands/mark-all-listened
 ├── listeners/                   # RabbitMQ message handlers
-│   ├── CommandsListener.java    # Listens to `commands` exchange
 │   ├── EventsListener.java      # Listens to `events` exchange
 │   └── handlers/                # Handler implementations
+│       └── AddMediaCommandHandler.java # RPC on `media.add` queue (exchange `rpc`)
 ├── repository/                  # Data layer
 │   ├── VideoData.java           # JPA entity
 │   ├── VideoDataRepository.java # Micronaut Data JDBC interface
@@ -40,6 +40,7 @@ media/
 | Add query endpoint | `VideoController.java` | `@Get` methods |
 | Add command endpoint | `commands/` | New class with `@Controller` + `@Put`/`@Post` |
 | Add message handler | `listeners/handlers/` | Implement handler, register in listener |
+| Add RPC handler | `listeners/handlers/` | `@RabbitListener` + `@Queue`, declare binding on `rpc` exchange, return a `@Serdeable` response |
 | Modify persistence | `repository/VideoRepository.java` | Domain logic here, not in entity |
 | Add metric | `metrics/MediaMetrics.java` | Counter/Gauge registration |
 

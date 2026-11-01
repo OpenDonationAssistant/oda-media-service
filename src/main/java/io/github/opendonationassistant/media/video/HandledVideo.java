@@ -3,7 +3,7 @@ package io.github.opendonationassistant.media.video;
 import io.github.opendonationassistant.media.repository.VideoData;
 import io.github.opendonationassistant.media.repository.VideoDataRepository;
 
-public class HandledVideo {
+public class HandledVideo implements HasVideoData {
 
   private VideoData data;
   private final VideoDataRepository repository;
@@ -17,6 +17,7 @@ public class HandledVideo {
     repository.update(data);
   }
 
+  @Override
   public VideoData data() {
     return this.data;
   }

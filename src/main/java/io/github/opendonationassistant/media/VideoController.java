@@ -25,6 +25,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.inject.Inject;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,7 +56,13 @@ public class VideoController extends BaseController {
     ) @PathVariable String id
   ) {
     log.info("Try to make {} handled", id);
-    repository.findReadyVideo(id).ifPresent(ReadyVideo::makeHandled);
+    repository
+      .findById(id)
+      .ifPresent(it -> {
+        if (it instanceof ReadyVideo readyVideo) {
+          readyVideo.makeHandled();
+        }
+      });
   }
 
   @Get("{ids}")
@@ -80,8 +87,17 @@ public class VideoController extends BaseController {
   ) {
     return Arrays.asList(ids.split(","))
       .stream()
-      .flatMap(id -> repository.findReadyVideo(id).stream())
-      .map(ReadyVideo::data)
+      .flatMap(id ->
+        repository
+          .findById(id)
+          .flatMap(it -> {
+            if (it instanceof ReadyVideo video) {
+              return Optional.of(video.data());
+            }
+            return Optional.empty();
+          })
+          .stream()
+      )
       .toList();
   }
 

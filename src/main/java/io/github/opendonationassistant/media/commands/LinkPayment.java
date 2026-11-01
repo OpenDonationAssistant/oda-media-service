@@ -48,23 +48,30 @@ public class LinkPayment {
   ) {
     return CompletableFuture.supplyAsync(() -> {
       log.info("Linking media to payment", Map.of("command", command));
-      final List<PreparedVideo> found = command
-        .mediaIds()
-        .stream()
-        .flatMap(id -> videoRepository.findPreparedVideo(id).stream())
-        .toList();
-      found.forEach(video -> {
-        video.linkPayment(command.paymentId());
-        metrics.mediaPaymentLinked();
-      });
       Integer songCost = Optional.ofNullable(
         settingsRepository
           .getByRecipientId(command.recipientId())
           .getData()
           .songRequestCost()
       ).orElse(100);
+      var totalCost = command
+        .mediaIds()
+        .stream()
+        .flatMap(id -> videoRepository.findById(id).stream())
+        .reduce(
+          Integer.valueOf(0),
+          (sum, video) -> {
+            if (video instanceof PreparedVideo preparedVideo) {
+              preparedVideo.linkPayment(command.paymentId());
+              metrics.mediaPaymentLinked();
+              return sum + songCost;
+            }
+            return sum;
+          },
+          Integer::sum
+        );
       return HttpResponse.ok(
-        new LinkPaymentResponse(new Amount(songCost * found.size(), 0, "RUB"))
+        new LinkPaymentResponse(new Amount(totalCost, 0, "RUB"))
       );
     });
   }

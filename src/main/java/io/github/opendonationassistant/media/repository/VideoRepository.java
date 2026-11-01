@@ -1,6 +1,5 @@
 package io.github.opendonationassistant.media.repository;
 
-import com.fasterxml.uuid.Generators;
 import io.github.opendonationassistant.commons.logging.ODALogger;
 import io.github.opendonationassistant.events.history.HistoryFacade;
 import io.github.opendonationassistant.integration.vk.VKApi;
@@ -10,6 +9,7 @@ import io.github.opendonationassistant.integration.youtube.Video;
 import io.github.opendonationassistant.integration.youtube.YouTube;
 import io.github.opendonationassistant.media.senders.ReadyVideoNotificationSender;
 import io.github.opendonationassistant.media.video.HandledVideo;
+import io.github.opendonationassistant.media.video.HasVideoData;
 import io.github.opendonationassistant.media.video.prepared.PreparedVideo;
 import io.github.opendonationassistant.media.video.ready.ReadyVideo;
 import io.github.opendonationassistant.settings.repository.MediaSettings;
@@ -71,18 +71,25 @@ public class VideoRepository {
     this.repository = repository;
   }
 
-  public Optional<PreparedVideo> findPreparedVideo(@Nullable String id) {
-    return Optional.ofNullable(id)
-      .flatMap(dataRepository::findById)
-      .filter(it -> "prepared".equals(it.status()))
-      .map(data ->
-        new PreparedVideo(
+  public Optional<HasVideoData> findById(String id) {
+    return dataRepository.findById(id).map(this::convert);
+  }
+
+  private HasVideoData convert(VideoData data) {
+    switch (data.status()) {
+      case "ready":
+        return new ReadyVideo(data, dataRepository);
+      case "handled":
+        return new HandledVideo(data, dataRepository);
+      case "prepared":
+      default:
+        return new PreparedVideo(
           data,
           dataRepository,
           notificationSender,
           historyFacade
-        )
-      );
+        );
+    }
   }
 
   public CompletableFuture<List<PreparedVideo>> findPreparedVideosForPayment(
@@ -117,13 +124,6 @@ public class VideoRepository {
         })
         .toList();
     });
-  }
-
-  public Optional<ReadyVideo> findReadyVideo(@Nullable String id) {
-    return Optional.ofNullable(id)
-      .flatMap(dataRepository::findById)
-      .filter(it -> "ready".equals(it.status()))
-      .map(data -> new ReadyVideo(data, dataRepository));
   }
 
   public CompletableFuture<Long> countReadyVideosForRecipientId(
@@ -161,6 +161,7 @@ public class VideoRepository {
   }
 
   public CompletableFuture<PreparedVideo> create(
+    String id,
     String recipientId,
     String url
   ) {
@@ -173,24 +174,23 @@ public class VideoRepository {
           .build()
       );
     }
-    log.info("Creating video", Map.of("url", url, "recipientId", recipientId));
+    log.info(
+      "Creating video",
+      Map.of("id", id, "url", url, "recipientId", recipientId)
+    );
     final MediaSettings settings = repository.getByRecipientId(recipientId);
     if (url.contains("vkvideo.ru")) {
-      return createFromVk(settings, url).thenApply(this::convert);
+      return createFromVk(id, settings, url).thenApply(it ->
+        new PreparedVideo(it, dataRepository, notificationSender, historyFacade)
+      );
     }
-    return createFromYoutube(settings, url).thenApply(this::convert);
-  }
-
-  private PreparedVideo convert(VideoData data) {
-    return new PreparedVideo(
-      data,
-      dataRepository,
-      notificationSender,
-      historyFacade
+    return createFromYoutube(id, settings, url).thenApply(it ->
+      new PreparedVideo(it, dataRepository, notificationSender, historyFacade)
     );
   }
 
   private CompletableFuture<VideoData> createFromVk(
+    String id,
     MediaSettings settings,
     String url
   ) {
@@ -203,7 +203,6 @@ public class VideoRepository {
           .build()
       );
     }
-    var id = Generators.timeBasedEpochGenerator().generate().toString();
     var originId = url.replaceAll("https://vkvideo.ru/video", "");
     return vk
       .getEmbeddedInfo(Map.of("url", url, "v", "5.199"))
@@ -244,6 +243,7 @@ public class VideoRepository {
   }
 
   private CompletableFuture<VideoData> createFromYoutube(
+    String id,
     MediaSettings settings,
     String url
   ) {
@@ -256,7 +256,6 @@ public class VideoRepository {
           .build()
       );
     }
-    var id = Generators.timeBasedEpochGenerator().generate().toString();
 
     if (url == null || url.isBlank()) {
       return CompletableFuture.failedFuture(

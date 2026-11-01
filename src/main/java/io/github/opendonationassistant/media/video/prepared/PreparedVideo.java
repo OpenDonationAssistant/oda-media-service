@@ -6,12 +6,13 @@ import io.github.opendonationassistant.events.history.event.MediaHistoryEvent;
 import io.github.opendonationassistant.media.repository.VideoData;
 import io.github.opendonationassistant.media.repository.VideoDataRepository;
 import io.github.opendonationassistant.media.senders.ReadyVideoNotificationSender;
+import io.github.opendonationassistant.media.video.HasVideoData;
 import io.github.opendonationassistant.media.video.ready.ReadyVideo;
 import java.time.Instant;
 import java.util.Map;
 import org.jspecify.annotations.Nullable;
 
-public class PreparedVideo {
+public class PreparedVideo implements HasVideoData {
 
   private static final ODALogger log = new ODALogger(PreparedVideo.class);
   private VideoData data;
@@ -82,5 +83,10 @@ public class PreparedVideo {
       })
       .join();
     return video;
+  }
+
+  @Override
+  public VideoData data() {
+    return this.data;
   }
 }

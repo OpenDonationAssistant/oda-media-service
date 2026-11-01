@@ -3,6 +3,8 @@ package io.github.opendonationassistant.media.listeners.handlers;
 import io.github.opendonationassistant.commons.logging.ODALogger;
 import io.github.opendonationassistant.media.metrics.MediaMetrics;
 import io.github.opendonationassistant.media.repository.VideoRepository;
+import io.github.opendonationassistant.media.video.HasVideoData;
+import io.github.opendonationassistant.media.video.prepared.PreparedVideo;
 import io.github.opendonationassistant.rabbit.Exchange;
 import io.micronaut.rabbitmq.annotation.Queue;
 import io.micronaut.rabbitmq.annotation.RabbitListener;
@@ -51,19 +53,35 @@ public class AddMediaCommandHandler {
   @Queue(QUEUE_NAME)
   public AddMediaResponse handle(AddMediaRequest request) {
     metrics.mediaRequested(request.system());
+    if (request.id() == null || request.id().isBlank()) {
+      metrics.mediaFailed(request.system());
+      return new AddMediaResponse(null, "Media id is empty");
+    }
     final var url = extractVideoUrl(request.url());
     try {
-      final var video = videoRepository
-        .create(request.recipientId(), url)
-        .join()
-        .makeReady(request.requester(), request.recipientId(), null);
-      metrics.mediaAdded(request.system());
+      HasVideoData video = videoRepository
+        .findById(request.id())
+        .orElseGet(() ->
+          videoRepository
+            .create(request.id(), request.recipientId(), url)
+            .join()
+        );
+      if (video instanceof PreparedVideo preparedVideo) {
+        video = preparedVideo.makeReady(
+          request.requester(),
+          request.recipientId(),
+          null
+        );
+        metrics.mediaAdded(request.system());
+      }
       return new AddMediaResponse(video.data().id(), "");
     } catch (Exception e) {
       metrics.mediaFailed(request.system());
       final var errorMessage = describeError(e);
       log.context(
         Map.of(
+          "id",
+          request.id(),
           "url",
           Objects.toString(url, ""),
           "recipientId",
@@ -92,9 +110,7 @@ public class AddMediaCommandHandler {
 
   private static String describeError(Throwable error) {
     var current = error;
-    while (
-      current.getCause() != null && current.getCause() != current
-    ) {
+    while (current.getCause() != null && current.getCause() != current) {
       current = current.getCause();
     }
     if (current instanceof Problem problem) {
@@ -108,6 +124,7 @@ public class AddMediaCommandHandler {
 
   @Serdeable
   public static record AddMediaRequest(
+    String id,
     String url,
     String requester,
     String recipientId,

@@ -4,9 +4,11 @@ import io.github.opendonationassistant.commons.logging.ODALogger;
 import io.github.opendonationassistant.media.repository.VideoData;
 import io.github.opendonationassistant.media.repository.VideoDataRepository;
 import io.github.opendonationassistant.media.video.HandledVideo;
+import io.github.opendonationassistant.media.video.HasVideoData;
+
 import java.util.Map;
 
-public class ReadyVideo {
+public class ReadyVideo implements HasVideoData {
 
   private final ODALogger log = new ODALogger(this);
   private VideoData data;
@@ -29,6 +31,7 @@ public class ReadyVideo {
     return handled;
   }
 
+  @Override
   public VideoData data() {
     return this.data;
   }

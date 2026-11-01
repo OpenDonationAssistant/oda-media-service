@@ -20,7 +20,7 @@ oda-media-service/
 │   └── integration/              # External APIs (YouTube Data v3, VK Video)
 ├── src/main/resources/
 │   ├── application*.yml          # Micronaut profiles (standalone, allinone)
-│   └── db/migration/V1..V9       # Flyway SQL migrations
+│   └── db/migration/V1..V10      # Flyway SQL migrations
 ├── src/test/java/                # Tests (NOTE: different package: io.github.stcarolas.oda.media)
 ├── pom.xml                       # Maven build (Micronaut parent 5.1.0)
 ├── Dockerfile                    # Native binary on fedora:41

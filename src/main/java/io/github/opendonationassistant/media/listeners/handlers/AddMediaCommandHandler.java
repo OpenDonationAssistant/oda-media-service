@@ -1,5 +1,6 @@
 package io.github.opendonationassistant.media.listeners.handlers;
 
+import com.fasterxml.uuid.Generators;
 import io.github.opendonationassistant.commons.logging.ODALogger;
 import io.github.opendonationassistant.media.metrics.MediaMetrics;
 import io.github.opendonationassistant.media.repository.VideoRepository;
@@ -53,18 +54,20 @@ public class AddMediaCommandHandler {
   @Queue(QUEUE_NAME)
   public AddMediaResponse handle(AddMediaRequest request) {
     metrics.mediaRequested(request.system());
-    if (request.id() == null || request.id().isBlank()) {
-      metrics.mediaFailed(request.system());
-      return new AddMediaResponse(null, "Media id is empty");
-    }
+
+    // TODO temporary
+    var mediaId = Generators.timeBasedEpochGenerator().generate().toString();
+    // if (request.id() == null || request.id().isBlank()) {
+    //   metrics.mediaFailed(request.system());
+    //   return new AddMediaResponse(null, "Media id is empty");
+    // }
+
     final var url = extractVideoUrl(request.url());
     try {
       HasVideoData video = videoRepository
-        .findById(request.id())
+        .findById(mediaId)
         .orElseGet(() ->
-          videoRepository
-            .create(request.id(), request.recipientId(), url)
-            .join()
+          videoRepository.create(mediaId, request.recipientId(), url).join()
         );
       if (video instanceof PreparedVideo preparedVideo) {
         video = preparedVideo.makeReady(
@@ -96,7 +99,7 @@ public class AddMediaCommandHandler {
     }
   }
 
-  static String extractVideoUrl(@Nullable String message) {
+  private static String extractVideoUrl(@Nullable String message) {
     if (message == null) {
       return "";
     }

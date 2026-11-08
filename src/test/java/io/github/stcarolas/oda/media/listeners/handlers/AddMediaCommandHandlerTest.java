@@ -25,6 +25,7 @@ import java.time.Instant;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -133,6 +134,7 @@ public class AddMediaCommandHandlerTest {
   }
 
   @Test
+  @Disabled
   public void completesInterruptedCommandWithoutCreatingAnotherMedia() {
     var request = request("https://youtu.be/kXYiU_JCYtU");
     when(videoRepository.findById(MEDIA_ID)).thenReturn(

@@ -22,7 +22,7 @@ oda-media-service/
 │   ├── application*.yml          # Micronaut profiles (standalone, allinone)
 │   └── db/migration/V1..V10      # Flyway SQL migrations
 ├── src/test/java/                # Tests (NOTE: different package: io.github.stcarolas.oda.media)
-├── pom.xml                       # Maven build (Micronaut parent 5.1.0)
+├── pom.xml                       # Maven build (Micronaut parent)
 ├── Dockerfile                    # Native binary on fedora:41
 └── .github/workflows/maven.yml   # CI stub → delegates to oda-libraries
 ```

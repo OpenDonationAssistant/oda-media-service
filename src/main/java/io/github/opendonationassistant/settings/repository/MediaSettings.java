@@ -74,6 +74,9 @@ public class MediaSettings {
     var requestsEnabled = get(config, "requestsEnabled")
       .map(property -> (Boolean) property.value())
       .orElse(true);
+    var showQueueSize = get(config, "showQueueSizeOnPage")
+      .map(property -> (Boolean) property.value())
+      .orElse(true);
     var updated = new MediaSettingsData(
       data.id(),
       data.recipientId(),
@@ -141,6 +144,14 @@ public class MediaSettings {
         "paymentpage",
         "media.requests.enabled",
         requestsEnabled
+      )
+    );
+    configCommandSender.send(
+      new ConfigCommand.PutKeyValue(
+        data.recipientId(),
+        "paymentpage",
+        "media.requests.showQueueSize",
+        showQueueSize
       )
     );
 

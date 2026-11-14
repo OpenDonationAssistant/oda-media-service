@@ -9,10 +9,11 @@
   <parent>
     <groupId>io.micronaut.platform</groupId>
     <artifactId>micronaut-parent</artifactId>
-    <version>5.1.0</version>
+    <version>5.2.6</version>
   </parent>
 
   <properties>
+    <oda.version>0.12.251</oda.version>
     <packaging>jar</packaging>
     <jdk.version>25</jdk.version>
     <release.version>25</release.version>
@@ -40,12 +41,12 @@
     <dependency>
       <groupId>io.github.opendonationassistant</groupId>
       <artifactId>oda-rabbit-conf</artifactId>
-      <version>0.12.245</version>
+      <version>${oda.version}</version>
     </dependency>
     <dependency>
       <groupId>io.github.opendonationassistant</groupId>
       <artifactId>oda-test-utils</artifactId>
-      <version>0.12.245</version>
+      <version>${oda.version}</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.uuid</groupId>
